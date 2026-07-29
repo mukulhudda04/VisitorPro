@@ -1,0 +1,21 @@
+CREATE TABLE Visitors
+(
+    VisitorId INT IDENTITY(1,1) PRIMARY KEY,
+
+    FullName NVARCHAR(100) NOT NULL,
+
+    Phone NVARCHAR(15) NOT NULL,
+
+    Email NVARCHAR(100) NULL,
+
+    CompanyName NVARCHAR(100) NULL,
+
+    IDProofType NVARCHAR(50) NOT NULL,
+
+    IDProofNumber NVARCHAR(50) NOT NULL UNIQUE,
+
+    PhotoPath NVARCHAR(255) NULL,
+
+    CreatedAt DATETIME2 NOT NULL DEFAULT GETDATE()
+);
+GO
