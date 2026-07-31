@@ -22,15 +22,19 @@ const getVisitors = async (req, res) => {
 
 const createVisitor = async (req, res) => {
     try {
+
         const {
             FullName,
             Phone,
             Email,
             CompanyName,
             IDProofType,
-            IDProofNumber,
-            PhotoPath
+            IDProofNumber
         } = req.body;
+
+        const PhotoPath = req.file
+            ? `/uploads/${req.file.filename}`
+            : null;
 
         await sql.query`
             EXEC sp_CreateVisitor
@@ -45,7 +49,8 @@ const createVisitor = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: "Visitor created successfully"
+            message: "Visitor created successfully",
+            photo: PhotoPath
         });
 
     } catch (error) {
@@ -58,6 +63,7 @@ const createVisitor = async (req, res) => {
 
 const updateVisitor = async (req, res) => {
     try {
+
         const { id } = req.params;
 
         const {
@@ -66,9 +72,12 @@ const updateVisitor = async (req, res) => {
             Email,
             CompanyName,
             IDProofType,
-            IDProofNumber,
-            PhotoPath
+            IDProofNumber
         } = req.body;
+
+        const PhotoPath = req.file
+            ? `/uploads/${req.file.filename}`
+            : null;
 
         await sql.query`
             UPDATE Visitors
@@ -98,6 +107,7 @@ const updateVisitor = async (req, res) => {
 
 const deleteVisitor = async (req, res) => {
     try {
+
         const { id } = req.params;
 
         const result = await sql.query`

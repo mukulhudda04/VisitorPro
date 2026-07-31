@@ -5,6 +5,11 @@ const verifyToken = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
 
 const {
+    visitorValidationRules,
+    validate
+} = require("../validators/visitorValidator");
+
+const {
     getVisitors,
     createVisitor,
     updateVisitor,
@@ -23,13 +28,26 @@ router.post(
     "/",
     verifyToken,
     upload.single("photo"),
+    visitorValidationRules,
+    validate,
     createVisitor
 );
 
 // Update Visitor
-router.put("/:id", verifyToken, updateVisitor);
+router.put(
+    "/:id",
+    verifyToken,
+    upload.single("photo"),
+    visitorValidationRules,
+    validate,
+    updateVisitor
+);
 
 // Delete Visitor
-router.delete("/:id", verifyToken, deleteVisitor);
+router.delete(
+    "/:id",
+    verifyToken,
+    deleteVisitor
+);
 
 module.exports = router;
