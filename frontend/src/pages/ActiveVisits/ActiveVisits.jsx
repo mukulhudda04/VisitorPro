@@ -35,6 +35,10 @@ const ActiveVisits = () => {
 
       const response = await getActiveVisits();
 
+      console.log("API Response:", response);
+      console.log("Visits Data:", response.data);
+console.log("First CheckIn:", response.data[0]?.CheckInTime);
+
       setVisits(response.data || []);
     } catch (err) {
       console.error(err);
@@ -45,16 +49,12 @@ const ActiveVisits = () => {
   };
 
   const handleCheckout = async (visitId) => {
-    const confirm = window.confirm(
-      "Check-Out this visitor?"
-    );
+    const confirm = window.confirm("Check-Out this visitor?");
 
     if (!confirm) return;
 
     try {
-      const response = await checkOutVisitor(
-        visitId
-      );
+      const response = await checkOutVisitor(visitId);
 
       alert(response.message);
 
@@ -67,11 +67,7 @@ const ActiveVisits = () => {
 
   return (
     <Box>
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        mb={3}
-      >
+      <Typography variant="h4" fontWeight="bold" mb={3}>
         Active Visits
       </Typography>
 
@@ -96,34 +92,13 @@ const ActiveVisits = () => {
 
                 <TableHead>
                   <TableRow>
-                    <TableCell>
-                      <b>Visit ID</b>
-                    </TableCell>
-
-                    <TableCell>
-                      <b>Visitor</b>
-                    </TableCell>
-
-                    <TableCell>
-                      <b>Employee</b>
-                    </TableCell>
-
-                    <TableCell>
-                      <b>Department</b>
-                    </TableCell>
-
-                    <TableCell>
-                      <b>Purpose</b>
-                    </TableCell>
-
-                    <TableCell>
-                      <b>Check In</b>
-                    </TableCell>
-
-                    <TableCell align="center">
-                      <b>Action</b>
-                    </TableCell>
-
+                    <TableCell><b>Visit ID</b></TableCell>
+                    <TableCell><b>Visitor</b></TableCell>
+                    <TableCell><b>Employee</b></TableCell>
+                    <TableCell><b>Department</b></TableCell>
+                    <TableCell><b>Purpose</b></TableCell>
+                    <TableCell><b>Check In</b></TableCell>
+                    <TableCell align="center"><b>Action</b></TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -131,55 +106,32 @@ const ActiveVisits = () => {
 
                   {visits.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={7}
-                        align="center"
-                      >
+                      <TableCell colSpan={7} align="center">
                         No Active Visitors
                       </TableCell>
                     </TableRow>
                   ) : (
                     visits.map((visit) => (
-                      <TableRow
-                        key={visit.VisitId}
-                      >
-                        <TableCell>
-                          {visit.VisitId}
-                        </TableCell>
+                      <TableRow key={visit.VisitId}>
 
-                        <TableCell>
-                          {visit.FullName}
-                        </TableCell>
+                        <TableCell>{visit.VisitId}</TableCell>
 
-                        <TableCell>
-                          {visit.EmployeeName}
-                        </TableCell>
+                        <TableCell>{visit.FullName}</TableCell>
 
-                        <TableCell>
-                          {visit.Department}
-                        </TableCell>
+                        <TableCell>{visit.EmployeeName}</TableCell>
 
-                        <TableCell>
-                          {visit.Purpose}
-                        </TableCell>
+                        <TableCell>{visit.Department}</TableCell>
 
-                        <TableCell>
-                          {new Date(
-                            visit.CheckInTime
-                          ).toLocaleString()}
-                        </TableCell>
+                        <TableCell>{visit.Purpose}</TableCell>
+                      <TableCell>{visit.CheckInTime}</TableCell>
+                        {/* CHECK-IN DATE & TIME */}
 
-                        <TableCell
-                          align="center"
-                        >
+
+                        <TableCell align="center">
                           <Button
                             color="error"
                             variant="contained"
-                            onClick={() =>
-                              handleCheckout(
-                                visit.VisitId
-                              )
-                            }
+                            onClick={() => handleCheckout(visit.VisitId)}
                           >
                             Check-Out
                           </Button>

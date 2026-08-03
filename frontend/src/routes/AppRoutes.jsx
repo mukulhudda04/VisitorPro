@@ -4,7 +4,10 @@ import Login from "../pages/Login/Login";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Visitors from "../pages/Visitors/Visitors";
 import ActiveVisits from "../pages/ActiveVisits/ActiveVisits";
+import CheckIn from "../pages/CheckIn/CheckIn";
+import VisitHistory from "../pages/VisitHistory/VisitHistory";
 import DashboardLayout from "../layouts/DashboardLayout";
+import Users from "../pages/Users/Users";
 
 const AppRoutes = () => {
   return (
@@ -20,6 +23,9 @@ const AppRoutes = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/visitors" element={<Visitors />} />
         <Route path="/active-visits" element={<ActiveVisits />} />
+        <Route path="/checkin" element={<CheckIn />} />
+        <Route path="/visit-history" element={<VisitHistory />} />
+        <Route path="/users" element={<Users />} />
       </Route>
     </Routes>
   );

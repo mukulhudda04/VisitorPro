@@ -87,6 +87,7 @@ const DashboardLayout = () => {
         </Toolbar>
 
         <List>
+
           <ListItemButton
             selected={location.pathname === "/dashboard"}
             onClick={() => navigate("/dashboard")}
@@ -117,33 +118,50 @@ const DashboardLayout = () => {
             <ListItemText primary="Active Visits" />
           </ListItemButton>
 
-          <ListItemButton>
+          {/* Check In */}
+          <ListItemButton
+            selected={location.pathname === "/checkin"}
+            onClick={() => navigate("/checkin")}
+          >
             <ListItemIcon>
               <LoginIcon sx={{ color: "#fff" }} />
             </ListItemIcon>
             <ListItemText primary="Check In" />
           </ListItemButton>
 
-          <ListItemButton>
+          {/* Check Out */}
+          <ListItemButton
+            selected={location.pathname === "/active-visits"}
+            onClick={() => navigate("/active-visits")}
+          >
             <ListItemIcon>
               <LogoutIcon sx={{ color: "#fff" }} />
             </ListItemIcon>
             <ListItemText primary="Check Out" />
           </ListItemButton>
 
-          <ListItemButton>
-            <ListItemIcon>
-              <HistoryIcon sx={{ color: "#fff" }} />
-            </ListItemIcon>
-            <ListItemText primary="Visit History" />
-          </ListItemButton>
+          {/* Visit History */}
+          <ListItemButton
+  selected={location.pathname === "/visit-history"}
+  onClick={() => navigate("/visit-history")}
+>
+  <ListItemIcon>
+    <HistoryIcon sx={{ color: "#fff" }} />
+  </ListItemIcon>
+  <ListItemText primary="Visit History" />
+</ListItemButton>
 
-          <ListItemButton>
-            <ListItemIcon>
-              <GroupIcon sx={{ color: "#fff" }} />
-            </ListItemIcon>
-            <ListItemText primary="Users" />
-          </ListItemButton>
+          {/* Users */}
+         <ListItemButton
+  selected={location.pathname === "/users"}
+  onClick={() => navigate("/users")}
+>
+  <ListItemIcon>
+    <GroupIcon sx={{ color: "#fff" }} />
+  </ListItemIcon>
+  <ListItemText primary="Users" />
+</ListItemButton>
+
         </List>
       </Drawer>
 

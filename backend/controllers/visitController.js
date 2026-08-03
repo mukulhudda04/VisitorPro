@@ -70,10 +70,19 @@ const getActiveVisits = async (req, res) => {
             EXEC sp_GetActiveVisits
         `);
 
+        const data = result.recordset.map((visit) => ({
+            ...visit,
+            CheckInTime: visit.CheckInTime
+                ? new Date(
+                    new Date(visit.CheckInTime).getTime() + (330 * 60 * 1000)
+                )
+                : null
+        }));
+
         res.status(200).json({
             success: true,
-            count: result.recordset.length,
-            data: result.recordset
+            count: data.length,
+            data
         });
 
     } catch (error) {
@@ -93,10 +102,24 @@ const getVisitHistory = async (req, res) => {
             EXEC sp_GetVisitHistory
         `);
 
+        const data = result.recordset.map((visit) => ({
+            ...visit,
+            CheckInTime: visit.CheckInTime
+                ? new Date(
+                    new Date(visit.CheckInTime).getTime() + (330 * 60 * 1000)
+                )
+                : null,
+            CheckOutTime: visit.CheckOutTime
+                ? new Date(
+                    new Date(visit.CheckOutTime).getTime() + (330 * 60 * 1000)
+                )
+                : null
+        }));
+
         res.status(200).json({
             success: true,
-            count: result.recordset.length,
-            data: result.recordset
+            count: data.length,
+            data
         });
 
     } catch (error) {

@@ -10,6 +10,7 @@ const userRoutes = require("./routes/userRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
 const visitRoutes = require("./routes/visitRoutes");
 const authRoutes = require("./routes/authRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // Load Environment Variables
 dotenv.config();
@@ -35,6 +36,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // API Routes
 // ==========================
 app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/visitors", visitorRoutes);
 app.use("/api/visits", visitRoutes);

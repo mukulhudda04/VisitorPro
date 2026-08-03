@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { getDashboardStats } from "../../services/dashboardService";
+
 import {
   Box,
   Card,
@@ -6,27 +9,47 @@ import {
   Typography,
 } from "@mui/material";
 
-const cards = [
-  {
-    title: "Total Visitors",
-    value: 0,
-  },
-  {
-    title: "Active Visitors",
-    value: 0,
-  },
-  {
-    title: "Checked Out Today",
-    value: 0,
-  },
-  {
-    title: "Today's Visits",
-    value: 0,
-  },
-];
-
 const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const [stats, setStats] = useState({
+    TotalVisitors: 0,
+    ActiveVisitors: 0,
+    TodayVisits: 0,
+    CheckedOutToday: 0,
+  });
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      const response = await getDashboardStats();
+      setStats(response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const cards = [
+    {
+      title: "Total Visitors",
+      value: stats.TotalVisitors,
+    },
+    {
+      title: "Active Visitors",
+      value: stats.ActiveVisitors,
+    },
+    {
+      title: "Checked Out Today",
+      value: stats.CheckedOutToday,
+    },
+    {
+      title: "Today's Visits",
+      value: stats.TodayVisits,
+    },
+  ];
 
   return (
     <Box>
