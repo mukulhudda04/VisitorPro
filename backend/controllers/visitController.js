@@ -66,30 +66,24 @@ const checkOutVisitor = async (req, res) => {
 // ==========================
 const getActiveVisits = async (req, res) => {
     try {
+
         const result = await sql.query(`
             EXEC sp_GetActiveVisits
         `);
 
-        const data = result.recordset.map((visit) => ({
-            ...visit,
-            CheckInTime: visit.CheckInTime
-                ? new Date(
-                    new Date(visit.CheckInTime).getTime() + (330 * 60 * 1000)
-                )
-                : null
-        }));
-
         res.status(200).json({
             success: true,
-            count: data.length,
-            data
+            count: result.recordset.length,
+            data: result.recordset
         });
 
     } catch (error) {
+
         res.status(500).json({
             success: false,
             message: error.message
         });
+
     }
 };
 

@@ -6,11 +6,15 @@ const path = require("path");
 
 const connectDB = require("./config/db");
 
+const authRoutes = require("./routes/authRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+
+const roleRoutes = require("./routes/roleRoutes");
+const departmentRoutes = require("./routes/departmentRoutes");
+
 const userRoutes = require("./routes/userRoutes");
 const visitorRoutes = require("./routes/visitorRoutes");
 const visitRoutes = require("./routes/visitRoutes");
-const authRoutes = require("./routes/authRoutes");
-const dashboardRoutes = require("./routes/dashboardRoutes");
 
 // Load Environment Variables
 dotenv.config();
@@ -29,14 +33,19 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 
-// Static Folder for Uploaded Files
+// Static Folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ==========================
 // API Routes
 // ==========================
 app.use("/api/auth", authRoutes);
+
 app.use("/api/dashboard", dashboardRoutes);
+
+app.use("/api/roles", roleRoutes);
+app.use("/api/departments", departmentRoutes);
+
 app.use("/api/users", userRoutes);
 app.use("/api/visitors", visitorRoutes);
 app.use("/api/visits", visitRoutes);

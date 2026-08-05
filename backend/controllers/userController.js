@@ -6,16 +6,22 @@ const bcrypt = require("bcrypt");
 // ===============================
 const getUsers = async (req, res) => {
     try {
+
         const result = await sql.query(`
             SELECT
-                U.UserId,
-                U.FullName,
-                U.Email,
-                U.Phone,
-                R.RoleName,
-                D.DepartmentName,
-                U.IsActive,
-                U.CreatedAt
+    U.UserId,
+    U.FullName,
+    U.Email,
+    U.Phone,
+
+    U.RoleId,
+    U.DepartmentId,
+
+    R.RoleName,
+    D.DepartmentName,
+
+    U.IsActive,
+    U.CreatedAt
             FROM Users U
             INNER JOIN Roles R
                 ON U.RoleId = R.RoleId
@@ -31,12 +37,14 @@ const getUsers = async (req, res) => {
         });
 
     } catch (error) {
+
         console.error("Get Users Error:", error);
 
         return res.status(500).json({
             success: false,
             message: "Internal Server Error."
         });
+
     }
 };
 
@@ -44,6 +52,7 @@ const getUsers = async (req, res) => {
 // Create User
 // ===============================
 const createUser = async (req, res) => {
+
     try {
 
         const {
@@ -55,7 +64,6 @@ const createUser = async (req, res) => {
             departmentId
         } = req.body;
 
-        // Validation
         if (
             !fullName ||
             !email ||
@@ -70,7 +78,6 @@ const createUser = async (req, res) => {
             });
         }
 
-        // Check Duplicate Email
         const existingUser = await sql.query`
             SELECT UserId
             FROM Users
@@ -84,10 +91,8 @@ const createUser = async (req, res) => {
             });
         }
 
-        // Hash Password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert User
         await sql.query`
             INSERT INTO Users
             (
@@ -124,10 +129,129 @@ const createUser = async (req, res) => {
             success: false,
             message: "Internal Server Error."
         });
+
     }
+
+};
+
+// ===============================
+// Update User
+// ===============================
+const updateUser = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const {
+            fullName,
+            email,
+            phone,
+            roleId,
+            departmentId,
+            isActive
+        } = req.body;
+
+        if (
+            !fullName ||
+            !email ||
+            !phone ||
+            !roleId ||
+            !departmentId
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required."
+            });
+        }
+
+        const existingUser = await sql.query`
+            SELECT UserId
+            FROM Users
+            WHERE Email = ${email}
+            AND UserId <> ${id}
+        `;
+
+        if (existingUser.recordset.length > 0) {
+            return res.status(409).json({
+                success: false,
+                message: "Email already exists."
+            });
+        }
+
+        await sql.query`
+            UPDATE Users
+            SET
+                FullName = ${fullName},
+                Email = ${email},
+                Phone = ${phone},
+                RoleId = ${roleId},
+                DepartmentId = ${departmentId},
+                IsActive = ${isActive}
+            WHERE UserId = ${id}
+        `;
+
+        return res.status(200).json({
+            success: true,
+            message: "User updated successfully."
+        });
+
+    } catch (error) {
+
+        console.error("Update User Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error."
+        });
+
+    }
+
+};
+
+// ===============================
+// Delete User
+// ===============================
+const deleteUser = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        // Prevent deleting default Admin
+if (Number(id) === 1) {
+    return res.status(403).json({
+        success: false,
+        message: "Default Admin cannot be deleted."
+    });
+}
+
+        await sql.query`
+            DELETE FROM Users
+            WHERE UserId = ${id}
+        `;
+
+        return res.status(200).json({
+            success: true,
+            message: "User deleted successfully."
+        });
+
+    } catch (error) {
+
+        console.error("Delete User Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Internal Server Error."
+        });
+
+    }
+
 };
 
 module.exports = {
     getUsers,
-    createUser
+    createUser,
+    updateUser,
+    deleteUser
 };

@@ -11,7 +11,9 @@ const {
 
 const {
     getUsers,
-    createUser
+    createUser,
+    updateUser,
+    deleteUser
 } = require("../controllers/userController");
 
 // ==========================
@@ -34,6 +36,22 @@ router.post(
     userValidationRules,
     validate,
     createUser
+);
+
+// Update User
+router.put(
+    "/:id",
+    verifyToken,
+    authorizeRoles(1),
+    updateUser
+);
+
+// Delete User
+router.delete(
+    "/:id",
+    verifyToken,
+    authorizeRoles(1),
+    deleteUser
 );
 
 module.exports = router;

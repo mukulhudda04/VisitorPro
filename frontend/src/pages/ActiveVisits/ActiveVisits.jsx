@@ -34,10 +34,9 @@ const ActiveVisits = () => {
       setLoading(true);
 
       const response = await getActiveVisits();
-
-      console.log("API Response:", response);
-      console.log("Visits Data:", response.data);
-console.log("First CheckIn:", response.data[0]?.CheckInTime);
+      console.log("FULL RESPONSE:", response);
+      console.log("RESPONSE DATA:", response.data);
+      console.log("FIRST ROW:", response.data?.[0]);
 
       setVisits(response.data || []);
     } catch (err) {
@@ -123,9 +122,10 @@ console.log("First CheckIn:", response.data[0]?.CheckInTime);
                         <TableCell>{visit.Department}</TableCell>
 
                         <TableCell>{visit.Purpose}</TableCell>
-                      <TableCell>{visit.CheckInTime}</TableCell>
-                        {/* CHECK-IN DATE & TIME */}
 
+                        <TableCell>
+                          {visit.CheckInTime}
+                        </TableCell>
 
                         <TableCell align="center">
                           <Button
