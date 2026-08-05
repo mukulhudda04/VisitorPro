@@ -65,6 +65,7 @@ const updateVisitor = async (req, res) => {
     try {
 
         const { id } = req.params;
+        console.log("Visitor ID:", id);
 
         const {
             FullName,
@@ -110,10 +111,15 @@ const deleteVisitor = async (req, res) => {
 
         const { id } = req.params;
 
-        const result = await sql.query`
-            DELETE FROM Visitors
-            WHERE VisitorId = ${id}
-        `;
+ await sql.query(`
+    DELETE FROM Visits
+    WHERE VisitorId = ${id}
+`);
+
+const result = await sql.query(`
+    DELETE FROM Visitors
+    WHERE VisitorId = ${id}
+`);       
 
         if (result.rowsAffected[0] === 0) {
             return res.status(404).json({
@@ -127,12 +133,18 @@ const deleteVisitor = async (req, res) => {
             message: "Visitor deleted successfully"
         });
 
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-    }
+  } catch (error) {
+
+    console.error("DELETE ERROR:");
+console.error(error.message);
+console.error(error);
+
+    res.status(500).json({
+        success: false,
+        message: error.message
+    });
+
+}
 };
 
 module.exports = {

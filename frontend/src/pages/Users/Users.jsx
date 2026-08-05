@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   Alert,
   Box,
@@ -12,13 +13,16 @@ import {
   DialogTitle,
   MenuItem,
   Paper,
+  Snackbar,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
+  TablePagination,
   TextField,
   Typography,
+  Chip,
 } from "@mui/material";
 
 import {
@@ -59,9 +63,17 @@ const [emailError, setEmailError] = useState("");
 const [phoneError, setPhoneError] = useState("");
 const [passwordError, setPasswordError] = useState("");
 
-  const [search, setSearch] = useState("");
 
-  // ==========================
+  const [search, setSearch] = useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("");
+const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+const [page, setPage] = useState(0);
+const [rowsPerPage, setRowsPerPage] = useState(5);
+const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+const [selectedUserId, setSelectedUserId] = useState(null);
+
+// ==========================
   // LOAD DATA
   // ==========================
   useEffect(() => {
@@ -173,7 +185,9 @@ const handleChange = (e) => {
 
       await createUser(formData);
 
-      alert("User created successfully.");
+      setSnackbarSeverity("success");
+setSnackbarMessage("User created successfully.");
+setSnackbarOpen(true);
 
       setOpen(false);
 
@@ -192,7 +206,9 @@ const handleChange = (e) => {
 
       console.error(err);
 
-      alert("Failed to create user.");
+      setSnackbarSeverity("error");
+setSnackbarMessage("Failed to create user.");
+setSnackbarOpen(true);
 
     }
 
@@ -235,7 +251,9 @@ const handleUpdateUser = async () => {
       isActive: true,
     });
 
-    alert("User updated successfully.");
+    setSnackbarSeverity("success");
+setSnackbarMessage("User updated successfully.");
+setSnackbarOpen(true);
 
     setOpen(false);
 
@@ -256,7 +274,9 @@ const handleUpdateUser = async () => {
 
     console.error(err);
 
-    alert("Failed to update user.");
+    setSnackbarSeverity("error");
+setSnackbarMessage("Failed to update user.");
+setSnackbarOpen(true);
 
   }
 
@@ -265,19 +285,26 @@ const handleUpdateUser = async () => {
 // ==========================
 // DELETE USER
 // ==========================
-const handleDeleteUser = async (id) => {
+const handleDeleteUser = (id) => {
 
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this user?"
-  );
+  setSelectedUserId(id);
 
-  if (!confirmDelete) return;
+  setDeleteDialogOpen(true);
+
+};
+
+const confirmDeleteUser = async () => {
 
   try {
 
-    const response = await deleteUser(id);
+    const response = await deleteUser(selectedUserId);
 
-    alert(response.message);
+    setSnackbarSeverity("success");
+    setSnackbarMessage(response.message);
+    setSnackbarOpen(true);
+
+    setDeleteDialogOpen(false);
+    setSelectedUserId(null);
 
     loadUsers();
 
@@ -285,7 +312,9 @@ const handleDeleteUser = async (id) => {
 
     console.error(err);
 
-    alert("Failed to delete user.");
+    setSnackbarSeverity("error");
+    setSnackbarMessage("Failed to delete user.");
+    setSnackbarOpen(true);
 
   }
 
@@ -367,6 +396,8 @@ const handleDeleteUser = async (id) => {
 
                     <TableCell><b>Department</b></TableCell>
 
+                    <TableCell><b>Status</b></TableCell>
+
                     <TableCell><b>Action</b></TableCell>
 
                   </TableRow>
@@ -396,6 +427,7 @@ const handleDeleteUser = async (id) => {
       user.FullName.toLowerCase().includes(search.toLowerCase()) ||
       user.Email.toLowerCase().includes(search.toLowerCase())
   )
+  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
   .map((user) => (
 
                       <TableRow key={user.UserId}>
@@ -409,6 +441,14 @@ const handleDeleteUser = async (id) => {
                         <TableCell>{user.RoleName}</TableCell>
 
                         <TableCell>{user.DepartmentName}</TableCell>
+
+  <TableCell>
+  <Chip
+    label={user.IsActive ? "Active" : "Inactive"}
+    color={user.IsActive ? "success" : "error"}
+    size="small"
+  />
+</TableCell>
 
 <TableCell>
 
@@ -441,7 +481,24 @@ const handleDeleteUser = async (id) => {
                 </TableBody>
 
               </Table>
-
+              <TablePagination
+  rowsPerPageOptions={[5, 10, 25]}
+  component="div"
+  count={
+    users.filter(
+      (user) =>
+        user.FullName.toLowerCase().includes(search.toLowerCase()) ||
+        user.Email.toLowerCase().includes(search.toLowerCase())
+    ).length
+  }
+  rowsPerPage={rowsPerPage}
+  page={page}
+  onPageChange={(event, newPage) => setPage(newPage)}
+  onRowsPerPageChange={(event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  }}
+/>
             </Paper>
 
           )}
@@ -488,17 +545,17 @@ const handleDeleteUser = async (id) => {
 helperText={emailError || "Enter a valid email address."}
           />
 
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Password"
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            error={!!passwordError}
-helperText={passwordError || "Password must be at least 8 characters."}
-          />
+<TextField
+  fullWidth
+  margin="normal"
+  label="Password"
+  type="password"
+  name="password"
+  value={formData.password}
+  onChange={handleChange}
+  error={!!passwordError}
+  helperText={passwordError || "Password must be at least 8 characters."}
+/>
 
           <TextField
   fullWidth
@@ -597,8 +654,56 @@ helperText={passwordError || "Password must be at least 8 characters."}
         </DialogActions>
 
       </Dialog>
+      <Dialog
+  open={deleteDialogOpen}
+  onClose={() => setDeleteDialogOpen(false)}
+>
+  <DialogTitle>
+    Delete User
+  </DialogTitle>
 
-        </Box>
+  <DialogContent>
+    Are you sure you want to delete this user?
+  </DialogContent>
+
+  <DialogActions>
+
+    <Button
+      onClick={() => setDeleteDialogOpen(false)}
+    >
+      Cancel
+    </Button>
+
+<Button
+  color="error"
+  variant="contained"
+  sx={{ minWidth: 100 }}
+  onClick={confirmDeleteUser}
+>
+      Delete
+    </Button>
+
+  </DialogActions>
+</Dialog>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+      >
+        <Alert
+          severity={snackbarSeverity}
+          onClose={() => setSnackbarOpen(false)}
+          variant="filled"
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
+    </Box>
   );
 };
 

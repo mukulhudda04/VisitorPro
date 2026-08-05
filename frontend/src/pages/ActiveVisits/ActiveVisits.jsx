@@ -13,6 +13,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  TextField,
 } from "@mui/material";
 
 import {
@@ -24,6 +25,7 @@ const ActiveVisits = () => {
   const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     loadVisits();
@@ -66,9 +68,27 @@ const ActiveVisits = () => {
 
   return (
     <Box>
-      <Typography variant="h4" fontWeight="bold" mb={3}>
-        Active Visits
-      </Typography>
+      <Box
+  display="flex"
+  justifyContent="space-between"
+  alignItems="center"
+  mb={3}
+>
+  <Typography
+    variant="h4"
+    fontWeight="bold"
+  >
+    Active Visits
+  </Typography>
+
+  <TextField
+    label="Search Visitor"
+    size="small"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    sx={{ width: 300 }}
+  />
+</Box>
 
       <Card sx={{ borderRadius: 3 }}>
         <CardContent>
@@ -110,7 +130,16 @@ const ActiveVisits = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    visits.map((visit) => (
+                    
+                    visits
+  .filter(
+    (visit) =>
+      visit.FullName.toLowerCase().includes(search.toLowerCase()) ||
+      visit.EmployeeName.toLowerCase().includes(search.toLowerCase()) ||
+      visit.Purpose.toLowerCase().includes(search.toLowerCase())
+  )
+  .map((visit) => (
+
                       <TableRow key={visit.VisitId}>
 
                         <TableCell>{visit.VisitId}</TableCell>

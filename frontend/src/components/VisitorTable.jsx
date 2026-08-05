@@ -1,9 +1,12 @@
+import { useState } from "react";
+
 import {
   Paper,
   Table,
   TableBody,
   TableCell,
   TableHead,
+  TablePagination,
   TableRow,
   Typography,
   IconButton,
@@ -18,6 +21,10 @@ const VisitorTable = ({
   onEdit,
   onDelete,
 }) => {
+
+  const [page, setPage] = useState(0);
+const [rowsPerPage, setRowsPerPage] = useState(5);
+
   return (
     <Paper elevation={3}>
       <Table>
@@ -40,7 +47,9 @@ const VisitorTable = ({
               </TableCell>
             </TableRow>
           ) : (
-            visitors.map((visitor) => (
+            visitors
+  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+  .map((visitor) => (
               <TableRow key={visitor.VisitorId}>
                 <TableCell>{visitor.VisitorId}</TableCell>
                 <TableCell>{visitor.FullName}</TableCell>
@@ -72,6 +81,20 @@ const VisitorTable = ({
           )}
         </TableBody>
       </Table>
+      
+      <TablePagination
+  rowsPerPageOptions={[5, 10, 25]}
+  component="div"
+  count={visitors.length}
+  rowsPerPage={rowsPerPage}
+  page={page}
+  onPageChange={(event, newPage) => setPage(newPage)}
+  onRowsPerPageChange={(event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  }}
+/>
+
     </Paper>
   );
 };

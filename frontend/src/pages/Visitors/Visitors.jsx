@@ -6,6 +6,12 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Dialog,
+DialogTitle,
+DialogContent,
+DialogActions,
+Snackbar,
+  TextField,
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -20,12 +26,17 @@ import VisitorTable from "../../components/VisitorTable";
 
 const Visitors = () => {
   const [visitors, setVisitors] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const [open, setOpen] = useState(false);
   const [selectedVisitor, setSelectedVisitor] = useState(null);
-
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+const [selectedVisitorId, setSelectedVisitorId] = useState(null);
+const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("");
+const [snackbarSeverity, setSnackbarSeverity] = useState("success");
   useEffect(() => {
     loadVisitors();
   }, []);
@@ -57,33 +68,36 @@ const Visitors = () => {
   };
 
   const handleEdit = (visitor) => {
-    setSelectedVisitor(visitor);
-    setOpen(true);
-  };
+  setSelectedVisitor(visitor);
+  setOpen(true);
+};
+console.log("Deleting Visitor ID:", selectedVisitorId);
 
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this visitor?"
-    );
+const handleConfirmDelete = async () => {
+  try {
+    const response = await deleteVisitor(selectedVisitorId);
 
-    if (!confirmDelete) return;
+    setSnackbarSeverity("success");
+setSnackbarMessage(response.message);
+setSnackbarOpen(true);
 
-    try {
-      const response = await deleteVisitor(id);
+    setDeleteDialogOpen(false);
+    setSelectedVisitorId(null);
 
-      alert(response.message);
+    loadVisitors();
+  } catch (error) {
+    console.error(error);
 
-      loadVisitors();
-    } catch (error) {
-      console.error(error);
+    setSnackbarSeverity("error");
+setSnackbarMessage("Failed to delete visitor.");
+setSnackbarOpen(true);
+  }
+};
 
-      if (error.response) {
-        alert(JSON.stringify(error.response.data, null, 2));
-      } else {
-        alert("Failed to delete visitor.");
-      }
-    }
-  };
+  const handleDelete = (id) => {
+  setSelectedVisitorId(id);
+  setDeleteDialogOpen(true);
+};
 
   return (
     <Box>
@@ -98,6 +112,14 @@ const Visitors = () => {
         <Typography variant="h4" fontWeight="bold">
           Visitors
         </Typography>
+        
+        <TextField
+  label="Search Visitor"
+  size="small"
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+  sx={{ width: 300 }}
+/>
 
         <Button
           variant="contained"
@@ -123,11 +145,16 @@ const Visitors = () => {
           {error && <Alert severity="error">{error}</Alert>}
 
           {!loading && !error && (
-            <VisitorTable
-              visitors={visitors}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+<VisitorTable
+  visitors={visitors.filter(
+    (visitor) =>
+      visitor.FullName.toLowerCase().includes(search.toLowerCase()) ||
+      visitor.Email.toLowerCase().includes(search.toLowerCase()) ||
+      visitor.Phone.includes(search)
+  )}
+  onEdit={handleEdit}
+  onDelete={handleDelete}
+/>
           )}
         </CardContent>
       </Card>
@@ -137,6 +164,54 @@ const Visitors = () => {
         handleClose={handleClose}
         visitor={selectedVisitor}
       />
+
+<Dialog
+  open={deleteDialogOpen}
+  onClose={() => setDeleteDialogOpen(false)}
+>
+  <DialogTitle>
+    Delete Visitor
+  </DialogTitle>
+
+  <DialogContent>
+    Are you sure you want to delete this visitor?
+  </DialogContent>
+
+  <DialogActions>
+    <Button
+      onClick={() => setDeleteDialogOpen(false)}
+    >
+      Cancel
+    </Button>
+
+    <Button
+      color="error"
+      variant="contained"
+      onClick={handleConfirmDelete}
+    >
+      Delete
+    </Button>
+  </DialogActions>
+</Dialog>
+
+<Snackbar
+  open={snackbarOpen}
+  autoHideDuration={3000}
+  onClose={() => setSnackbarOpen(false)}
+  anchorOrigin={{
+    vertical: "bottom",
+    horizontal: "right",
+  }}
+>
+  <Alert
+    severity={snackbarSeverity}
+    onClose={() => setSnackbarOpen(false)}
+    variant="filled"
+  >
+    {snackbarMessage}
+  </Alert>
+</Snackbar>
+
     </Box>
   );
 };

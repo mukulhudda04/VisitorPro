@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { getDashboardStats } from "../../services/dashboardService";
+import PeopleIcon from "@mui/icons-material/People";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
+import LogoutIcon from "@mui/icons-material/Logout";
+import TodayIcon from "@mui/icons-material/Today";
 
 import {
+  Avatar,
   Box,
   Card,
   CardContent,
@@ -20,8 +25,16 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
+
+  loadDashboard();
+
+  const interval = setInterval(() => {
     loadDashboard();
-  }, []);
+  }, 30000);
+
+  return () => clearInterval(interval);
+
+}, []);
 
   const loadDashboard = async () => {
     try {
@@ -32,25 +45,32 @@ const Dashboard = () => {
     }
   };
 
-  const cards = [
-    {
-      title: "Total Visitors",
-      value: stats.TotalVisitors,
-    },
-    {
-      title: "Active Visitors",
-      value: stats.ActiveVisitors,
-    },
-    {
-      title: "Checked Out Today",
-      value: stats.CheckedOutToday,
-    },
-    {
-      title: "Today's Visits",
-      value: stats.TodayVisits,
-    },
-  ];
-
+const cards = [
+  {
+    title: "Total Visitors",
+    value: stats.TotalVisitors,
+    icon: <PeopleIcon />,
+    color: "#1976d2",
+  },
+  {
+    title: "Active Visitors",
+    value: stats.ActiveVisitors,
+    icon: <PersonAddAlt1Icon />,
+    color: "#2e7d32",
+  },
+  {
+    title: "Checked Out Today",
+    value: stats.CheckedOutToday,
+    icon: <LogoutIcon />,
+    color: "#d32f2f",
+  },
+  {
+    title: "Today's Visits",
+    value: stats.TodayVisits,
+    icon: <TodayIcon />,
+    color: "#ed6c02",
+  },
+];
   return (
     <Box>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -71,25 +91,54 @@ const Dashboard = () => {
             <Card
               elevation={3}
               sx={{
-                borderRadius: 3,
-              }}
+  borderRadius: 3,
+  transition: "0.3s",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: 8,
+  },
+}}
             >
               <CardContent>
-                <Typography
-                  variant="subtitle1"
-                  color="text.secondary"
-                >
-                  {card.title}
-                </Typography>
 
-                <Typography
-                  variant="h3"
-                  fontWeight="bold"
-                  mt={2}
-                >
-                  {card.value}
-                </Typography>
-              </CardContent>
+  <Box
+    display="flex"
+    justifyContent="space-between"
+    alignItems="center"
+  >
+
+    <Box>
+
+      <Typography
+        variant="subtitle1"
+        color="text.secondary"
+      >
+        {card.title}
+      </Typography>
+
+      <Typography
+        variant="h3"
+        fontWeight="bold"
+        mt={1}
+      >
+        {card.value}
+      </Typography>
+
+    </Box>
+
+    <Avatar
+      sx={{
+        bgcolor: card.color,
+        width: 56,
+        height: 56,
+      }}
+    >
+      {card.icon}
+    </Avatar>
+
+  </Box>
+
+</CardContent>
             </Card>
           </Grid>
         ))}
