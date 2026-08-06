@@ -1,185 +1,635 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 import {
-  AppBar,
   Avatar,
   Box,
-  CssBaseline,
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  Grid,
+  Paper,
+  Stack,
   Typography,
 } from "@mui/material";
 
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import PeopleIcon from "@mui/icons-material/People";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import LoginIcon from "@mui/icons-material/Login";
-import LogoutIcon from "@mui/icons-material/Logout";
-import HistoryIcon from "@mui/icons-material/History";
-import GroupIcon from "@mui/icons-material/Group";
+import {
+  PeopleAlt,
+  PersonAddAlt1,
+  Logout,
+  Today,
+  CalendarMonth,
+  Circle,
+} from "@mui/icons-material";
 
-const drawerWidth = 260;
+import { PieChart } from "@mui/x-charts/PieChart";
 
-const DashboardLayout = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+import { getDashboardStats } from "../services/dashboardService";
+
+const Dashboard = () => {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
+  const [stats, setStats] = useState({
+    TotalVisitors: 0,
+    ActiveVisitors: 0,
+    TodayVisits: 0,
+    CheckedOutToday: 0,
+  });
+
+  useEffect(() => {
+
+    loadDashboard();
+
+    const interval = setInterval(() => {
+      loadDashboard();
+    }, 30000);
+
+    return () => clearInterval(interval);
+
+  }, []);
+
+  const loadDashboard = async () => {
+
+    try {
+
+      const res = await getDashboardStats();
+
+      setStats(res.data);
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+
+  const cards = [
+
+    {
+      title: "Total Visitors",
+      value: stats.TotalVisitors,
+      subtitle: "All time visitors",
+      color: "#2563EB",
+      icon: <PeopleAlt />,
+    },
+
+    {
+      title: "Active Visitors",
+      value: stats.ActiveVisitors,
+      subtitle: "Currently inside",
+      color: "#22C55E",
+      icon: <PersonAddAlt1 />,
+    },
+
+    {
+      title: "Today's Visits",
+      value: stats.TodayVisits,
+      subtitle: "Today's entries",
+      color: "#F59E0B",
+      icon: <Today />,
+    },
+
+    {
+      title: "Checked Out",
+      value: stats.CheckedOutToday,
+      subtitle: "Completed visits",
+      color: "#EF4444",
+      icon: <Logout />,
+    },
+
+  ];
+
+  const chartData = [
+
+    {
+      id: 0,
+      value: stats.ActiveVisitors,
+      label: "Active",
+      color: "#2563EB",
+    },
+
+    {
+      id: 1,
+      value: stats.CheckedOutToday,
+      label: "Checked Out",
+      color: "#F59E0B",
+    },
+
+  ];
+
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
 
-      {/* Top Navbar */}
-      <AppBar
-        position="fixed"
-        sx={{
-          width: `calc(100% - ${drawerWidth}px)`,
-          ml: `${drawerWidth}px`,
-          background: "#ffffff",
-          color: "#000",
-          boxShadow: 1,
-        }}
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: "100%",
+      }}
+    >
+
+          {/* ================= Header ================= */}
+
+      <Stack
+        direction={{ xs: "column", lg: "row" }}
+        justifyContent="space-between"
+        alignItems={{ xs: "flex-start", lg: "center" }}
+        spacing={2}
+        mb={5}
       >
-        <Toolbar>
+
+        <Box>
+
           <Typography
-            variant="h6"
-            sx={{
-              flexGrow: 1,
-              fontWeight: 600,
-            }}
+            variant="h3"
+            fontWeight={700}
           >
-            VisitorPro Dashboard
+            Welcome Back, {user?.fullName} 👋
           </Typography>
 
-          <Avatar sx={{ mr: 1 }}>
-            {user?.fullName?.charAt(0)}
-          </Avatar>
+          <Typography
+            color="text.secondary"
+            mt={1}
+            fontSize={17}
+          >
+            Here's what's happening with your visitor management today.
+          </Typography>
 
-          <Typography>{user?.fullName}</Typography>
-        </Toolbar>
-      </AppBar>
+        </Box>
 
-      {/* Sidebar */}
-      <Drawer
-        variant="permanent"
+        <Stack
+          direction="row"
+          spacing={2}
+        >
+
+          <Chip
+            icon={<CalendarMonth />}
+            label={new Date().toLocaleDateString()}
+            sx={{
+              height: 45,
+              px: 1,
+              fontSize: 15,
+            }}
+          />
+
+          <Chip
+            color="success"
+            icon={<Circle sx={{ fontSize: 12 }} />}
+            label="Live Dashboard"
+            sx={{
+              height: 45,
+              px: 1,
+              fontSize: 15,
+            }}
+          />
+
+        </Stack>
+
+      </Stack>
+
+      {/* ================= Top Cards ================= */}
+
+      <Grid
+        container
+        spacing={3}
         sx={{
-          width: drawerWidth,
-          "& .MuiDrawer-paper": {
-            width: drawerWidth,
-            background: "#0F172A",
-            color: "#fff",
-          },
+          mb: 4,
         }}
       >
-        <Toolbar>
-          <Typography
-            variant="h5"
+
+        {cards.map((card) => (
+
+          <Grid
+            key={card.title}
+            size={{ xs: 12, sm: 6, md: 3 }}
+          >
+
+            <Card
+              elevation={0}
+              sx={{
+                borderRadius: 4,
+                border: `2px solid ${card.color}20`,
+                transition: ".25s",
+                height: "100%",
+
+                "&:hover": {
+                  transform: "translateY(-6px)",
+                  boxShadow: "0 10px 30px rgba(0,0,0,.08)",
+                },
+              }}
+            >
+
+              <CardContent>
+
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+
+                  <Box>
+
+                    <Typography
+                      color="text.secondary"
+                    >
+                      {card.title}
+                    </Typography>
+
+                    <Typography
+                      variant="h3"
+                      fontWeight={700}
+                      mt={1}
+                    >
+                      {card.value}
+                    </Typography>
+
+                    <Typography
+                      color="text.secondary"
+                      mt={1}
+                    >
+                      {card.subtitle}
+                    </Typography>
+
+                  </Box>
+
+                  <Avatar
+                    sx={{
+                      bgcolor: card.color,
+                      width: 62,
+                      height: 62,
+                    }}
+                  >
+                    {card.icon}
+                  </Avatar>
+
+                </Stack>
+
+              </CardContent>
+
+            </Card>
+
+          </Grid>
+
+        ))}
+
+      </Grid>
+
+            {/* ================= Analytics ================= */}
+
+      <Grid container spacing={3}>
+
+        <Grid size={{ xs: 12, lg: 8 }}>
+
+          <Paper
+            elevation={0}
             sx={{
-              fontWeight: "bold",
+              p: 3,
+              borderRadius: 4,
+              border: "1px solid #E5E7EB",
+              height: 430,
             }}
           >
-            VisitorPro
-          </Typography>
-        </Toolbar>
 
-        <List>
+            <Typography
+              variant="h5"
+              fontWeight={700}
+            >
+              Visitor Analytics
+            </Typography>
 
-          <ListItemButton
-            selected={location.pathname === "/dashboard"}
-            onClick={() => navigate("/dashboard")}
+            <Typography
+              color="text.secondary"
+              mb={3}
+            >
+              Today's Visitor Distribution
+            </Typography>
+
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              height={300}
+            >
+
+              <PieChart
+                width={500}
+                height={280}
+                series={[
+                  {
+                    data: chartData,
+                    innerRadius: 70,
+                    outerRadius: 110,
+                    paddingAngle: 4,
+                    cornerRadius: 6,
+                  },
+                ]}
+              />
+
+            </Box>
+
+          </Paper>
+
+        </Grid>
+
+        <Grid size={{ xs: 12, lg: 4 }}>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: 4,
+              border: "1px solid #E5E7EB",
+              height: 430,
+            }}
           >
-            <ListItemIcon>
-              <DashboardIcon sx={{ color: "#fff" }} />
-            </ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
 
-          <ListItemButton
-            selected={location.pathname === "/visitors"}
-            onClick={() => navigate("/visitors")}
+            <Typography
+              variant="h5"
+              fontWeight={700}
+            >
+              Today's Summary
+            </Typography>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Stack spacing={3}>
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Typography color="text.secondary">
+                  Total Visitors
+                </Typography>
+
+                <Typography
+                  fontWeight={700}
+                  fontSize={22}
+                >
+                  {stats.TotalVisitors}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Typography color="text.secondary">
+                  Active Visitors
+                </Typography>
+
+                <Typography
+                  color="success.main"
+                  fontWeight={700}
+                  fontSize={22}
+                >
+                  {stats.ActiveVisitors}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Typography color="text.secondary">
+                  Today's Visits
+                </Typography>
+
+                <Typography
+                  color="warning.main"
+                  fontWeight={700}
+                  fontSize={22}
+                >
+                  {stats.TodayVisits}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Typography color="text.secondary">
+                  Checked Out
+                </Typography>
+
+                <Typography
+                  color="error.main"
+                  fontWeight={700}
+                  fontSize={22}
+                >
+                  {stats.CheckedOutToday}
+                </Typography>
+              </Box>
+
+            </Stack>
+
+          </Paper>
+
+        </Grid>
+
+      </Grid>
+
+            {/* ================= Bottom Section ================= */}
+
+      <Grid
+        container
+        spacing={3}
+        sx={{ mt: 1 }}
+      >
+
+        {/* Recent Activity */}
+
+        <Grid size={{ xs: 12, md: 6 }}>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: 4,
+              border: "1px solid #E5E7EB",
+              height: "100%",
+            }}
           >
-            <ListItemIcon>
-              <PeopleIcon sx={{ color: "#fff" }} />
-            </ListItemIcon>
-            <ListItemText primary="Visitors" />
-          </ListItemButton>
 
-          <ListItemButton
-            selected={location.pathname === "/active-visits"}
-            onClick={() => navigate("/active-visits")}
+            <Typography
+              variant="h5"
+              fontWeight={700}
+            >
+              Recent Activity
+            </Typography>
+
+            <Divider sx={{ my: 3 }} />
+
+            <Stack spacing={3}>
+
+              <Box display="flex" justifyContent="space-between">
+                <Typography color="text.secondary">
+                  Registered Visitors
+                </Typography>
+
+                <Typography fontWeight={700}>
+                  {stats.TotalVisitors}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box display="flex" justifyContent="space-between">
+                <Typography color="text.secondary">
+                  Visitors Inside
+                </Typography>
+
+                <Typography
+                  fontWeight={700}
+                  color="success.main"
+                >
+                  {stats.ActiveVisitors}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box display="flex" justifyContent="space-between">
+                <Typography color="text.secondary">
+                  Today's Entries
+                </Typography>
+
+                <Typography
+                  fontWeight={700}
+                  color="warning.main"
+                >
+                  {stats.TodayVisits}
+                </Typography>
+              </Box>
+
+              <Divider />
+
+              <Box display="flex" justifyContent="space-between">
+                <Typography color="text.secondary">
+                  Checked Out
+                </Typography>
+
+                <Typography
+                  fontWeight={700}
+                  color="error.main"
+                >
+                  {stats.CheckedOutToday}
+                </Typography>
+              </Box>
+
+            </Stack>
+
+          </Paper>
+
+        </Grid>
+
+        {/* Quick Overview */}
+
+        <Grid size={{ xs: 12, md: 6 }}>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: 4,
+              border: "1px solid #E5E7EB",
+              height: "100%",
+            }}
           >
-            <ListItemIcon>
-              <VisibilityIcon sx={{ color: "#fff" }} />
-            </ListItemIcon>
-            <ListItemText primary="Active Visits" />
-          </ListItemButton>
 
-          {/* Check In */}
-          <ListItemButton
-            selected={location.pathname === "/checkin"}
-            onClick={() => navigate("/checkin")}
-          >
-            <ListItemIcon>
-              <LoginIcon sx={{ color: "#fff" }} />
-            </ListItemIcon>
-            <ListItemText primary="Check In" />
-          </ListItemButton>
+            <Typography
+              variant="h5"
+              fontWeight={700}
+            >
+              Quick Overview
+            </Typography>
 
-          {/* Check Out */}
-          <ListItemButton
-            selected={location.pathname === "/active-visits"}
-            onClick={() => navigate("/active-visits")}
-          >
-            <ListItemIcon>
-              <LogoutIcon sx={{ color: "#fff" }} />
-            </ListItemIcon>
-            <ListItemText primary="Check Out" />
-          </ListItemButton>
+            <Divider sx={{ my: 3 }} />
 
-          {/* Visit History */}
-          <ListItemButton
-  selected={location.pathname === "/visit-history"}
-  onClick={() => navigate("/visit-history")}
->
-  <ListItemIcon>
-    <HistoryIcon sx={{ color: "#fff" }} />
-  </ListItemIcon>
-  <ListItemText primary="Visit History" />
-</ListItemButton>
+            <Stack spacing={2}>
 
-          {/* Users */}
-         <ListItemButton
-  selected={location.pathname === "/users"}
-  onClick={() => navigate("/users")}
->
-  <ListItemIcon>
-    <GroupIcon sx={{ color: "#fff" }} />
-  </ListItemIcon>
-  <ListItemText primary="Users" />
-</ListItemButton>
+              <Typography>
+                👥 Total Visitors :
+                <b> {stats.TotalVisitors}</b>
+              </Typography>
 
-        </List>
-      </Drawer>
+              <Typography>
+                🟢 Active Visitors :
+                <b> {stats.ActiveVisitors}</b>
+              </Typography>
 
-      {/* Main Content */}
-      <Box
-        component="main"
+              <Typography>
+                📅 Today's Visits :
+                <b> {stats.TodayVisits}</b>
+              </Typography>
+
+              <Typography>
+                🚪 Checked Out :
+                <b> {stats.CheckedOutToday}</b>
+              </Typography>
+
+            </Stack>
+
+          </Paper>
+
+        </Grid>
+
+      </Grid>
+
+      {/* Footer */}
+
+      <Paper
+        elevation={0}
         sx={{
-          flexGrow: 1,
+          mt: 4,
           p: 3,
-          background: "#F5F7FB",
-          minHeight: "100vh",
+          borderRadius: 4,
+          background:
+            "linear-gradient(135deg,#2563EB,#1D4ED8)",
+          color: "#fff",
         }}
       >
-        <Toolbar />
-        <Outlet />
-      </Box>
+
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+
+          <Box>
+
+            <Typography
+              variant="h5"
+              fontWeight={700}
+            >
+              VisitorPro
+            </Typography>
+
+            <Typography sx={{ opacity: .9 }}>
+              Smart Visitor Management System
+            </Typography>
+
+          </Box>
+
+          <Chip
+            label="System Online"
+            color="success"
+          />
+
+        </Stack>
+
+      </Paper>
+
     </Box>
+
   );
+
 };
 
-export default DashboardLayout;
+export default Dashboard;

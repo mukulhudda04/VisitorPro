@@ -11,6 +11,9 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  TablePagination,
+TextField,
+Chip,
   Typography,
 } from "@mui/material";
 
@@ -20,6 +23,9 @@ const VisitHistory = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+const [page, setPage] = useState(0);
+const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
     loadHistory();
@@ -42,13 +48,29 @@ const VisitHistory = () => {
 
   return (
     <Box>
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        mb={3}
-      >
-        Visit History
-      </Typography>
+    <Box
+  sx={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    mb: 3,
+  }}
+>
+  <Typography
+    variant="h4"
+    fontWeight="bold"
+  >
+    Visit History
+  </Typography>
+
+  <TextField
+    label="Search Visitor"
+    size="small"
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    sx={{ width: 300 }}
+  />
+</Box>
 
       <Card sx={{ borderRadius: 3 }}>
         <CardContent>
@@ -126,7 +148,18 @@ const VisitHistory = () => {
 
                   ) : (
 
-                    history.map((visit) => (
+                    history
+  .filter(
+    (visit) =>
+      visit.FullName.toLowerCase().includes(search.toLowerCase()) ||
+      visit.EmployeeName.toLowerCase().includes(search.toLowerCase()) ||
+      visit.Purpose.toLowerCase().includes(search.toLowerCase())
+  )
+  .slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  )
+  .map((visit) => (
 
                       <TableRow key={visit.VisitId}>
 
@@ -152,23 +185,35 @@ const VisitHistory = () => {
 
                         <TableCell>
                           {visit.CheckInTime
-                            ? new Date(
-                                visit.CheckInTime
-                              ).toLocaleString("en-IN")
-                            : "-"}
+  ? new Date(visit.CheckInTime).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  : "-"}
                         </TableCell>
 
                         <TableCell>
                           {visit.CheckOutTime
-                            ? new Date(
-                                visit.CheckOutTime
-                              ).toLocaleString("en-IN")
-                            : "-"}
+  ? new Date(visit.CheckOutTime).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  : "-"}
                         </TableCell>
 
                         <TableCell>
-                          {visit.Status}
-                        </TableCell>
+  <Chip
+    label={visit.Status}
+    color="success"
+    size="small"
+  />
+</TableCell>
 
                       </TableRow>
 
@@ -179,6 +224,26 @@ const VisitHistory = () => {
                 </TableBody>
 
               </Table>
+
+              <TablePagination
+  rowsPerPageOptions={[5, 10, 25]}
+  component="div"
+  count={
+    history.filter(
+      (visit) =>
+        visit.FullName.toLowerCase().includes(search.toLowerCase()) ||
+        visit.EmployeeName.toLowerCase().includes(search.toLowerCase()) ||
+        visit.Purpose.toLowerCase().includes(search.toLowerCase())
+    ).length
+  }
+  rowsPerPage={rowsPerPage}
+  page={page}
+  onPageChange={(event, newPage) => setPage(newPage)}
+  onRowsPerPageChange={(event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  }}
+/>
 
             </Paper>
                       )}

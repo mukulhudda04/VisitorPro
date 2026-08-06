@@ -6,6 +6,11 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Snackbar,
   Typography,
   Paper,
   Table,
@@ -13,6 +18,7 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  TablePagination,
   TextField,
 } from "@mui/material";
 
@@ -25,7 +31,15 @@ const ActiveVisits = () => {
   const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+const [rowsPerPage, setRowsPerPage] = useState(5);
+const [checkoutDialogOpen, setCheckoutDialogOpen] = useState(false);
+const [selectedVisitId, setSelectedVisitId] = useState(null);
+
+const [snackbarOpen, setSnackbarOpen] = useState(false);
+const [snackbarMessage, setSnackbarMessage] = useState("");
+const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+const [search, setSearch] = useState("");
 
   useEffect(() => {
     loadVisits();
@@ -49,25 +63,42 @@ const ActiveVisits = () => {
     }
   };
 
-  const handleCheckout = async (visitId) => {
-    const confirm = window.confirm("Check-Out this visitor?");
+const handleConfirmCheckout = async () => {
+  try {
 
-    if (!confirm) return;
+    const response = await checkOutVisitor(selectedVisitId);
 
-    try {
-      const response = await checkOutVisitor(visitId);
+    setSnackbarSeverity("success");
+    setSnackbarMessage(response.message);
+    setSnackbarOpen(true);
 
-      alert(response.message);
+    setCheckoutDialogOpen(false);
+    setSelectedVisitId(null);
 
-      loadVisits();
-    } catch (err) {
-      console.error(err);
-      alert("Check-Out failed.");
-    }
-  };
+    loadVisits();
+
+  } catch (err) {
+
+    console.error(err);
+
+    setSnackbarSeverity("error");
+    setSnackbarMessage("Check-Out failed.");
+    setSnackbarOpen(true);
+
+  }
+};
+
+const handleCheckout = (visitId) => {
+
+  setSelectedVisitId(visitId);
+  setCheckoutDialogOpen(true);
+
+};
 
   return (
     <Box>
+
+
       <Box
   display="flex"
   justifyContent="space-between"
@@ -138,6 +169,10 @@ const ActiveVisits = () => {
       visit.EmployeeName.toLowerCase().includes(search.toLowerCase()) ||
       visit.Purpose.toLowerCase().includes(search.toLowerCase())
   )
+  .slice(
+  page * rowsPerPage,
+  page * rowsPerPage + rowsPerPage
+)
   .map((visit) => (
 
                       <TableRow key={visit.VisitId}>
@@ -157,14 +192,17 @@ const ActiveVisits = () => {
                         </TableCell>
 
                         <TableCell align="center">
-                          <Button
-                            color="error"
-                            variant="contained"
-                            onClick={() => handleCheckout(visit.VisitId)}
-                          >
-                            Check-Out
-                          </Button>
-                        </TableCell>
+  <Button
+    color="error"
+    variant="contained"
+    onClick={() => {
+      console.log("Button Clicked:", visit.VisitId);
+      handleCheckout(visit.VisitId);
+    }}
+  >
+    Check-Out
+  </Button>
+</TableCell>
 
                       </TableRow>
                     ))
@@ -173,11 +211,80 @@ const ActiveVisits = () => {
                 </TableBody>
 
               </Table>
+
+<TablePagination
+  rowsPerPageOptions={[5, 10, 25]}
+  component="div"
+  count={
+    visits.filter(
+      (visit) =>
+        visit.FullName.toLowerCase().includes(search.toLowerCase()) ||
+        visit.EmployeeName.toLowerCase().includes(search.toLowerCase()) ||
+        visit.Purpose.toLowerCase().includes(search.toLowerCase())
+    ).length
+  }
+  rowsPerPage={rowsPerPage}
+  page={page}
+  onPageChange={(event, newPage) => setPage(newPage)}
+  onRowsPerPageChange={(event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  }}
+/>
+
             </Paper>
           )}
 
         </CardContent>
       </Card>
+
+          <Dialog
+  open={checkoutDialogOpen}
+  onClose={() => setCheckoutDialogOpen(false)}
+>
+  <DialogTitle>
+    Check-Out Visitor
+  </DialogTitle>
+
+  <DialogContent>
+    Are you sure you want to check-out this visitor?
+  </DialogContent>
+
+  <DialogActions>
+    <Button
+      onClick={() => setCheckoutDialogOpen(false)}
+    >
+      Cancel
+    </Button>
+
+    <Button
+      variant="contained"
+      color="error"
+      onClick={handleConfirmCheckout}
+    >
+      Check-Out
+    </Button>
+  </DialogActions>
+</Dialog>
+
+<Snackbar
+  open={snackbarOpen}
+  autoHideDuration={3000}
+  onClose={() => setSnackbarOpen(false)}
+  anchorOrigin={{
+    vertical: "bottom",
+    horizontal: "right",
+  }}
+>
+  <Alert
+    severity={snackbarSeverity}
+    variant="filled"
+    onClose={() => setSnackbarOpen(false)}
+  >
+    {snackbarMessage}
+  </Alert>
+</Snackbar>
+
     </Box>
   );
 };
