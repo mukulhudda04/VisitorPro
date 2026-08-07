@@ -1,635 +1,374 @@
-import { useEffect, useState } from "react";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 import {
+  AppBar,
   Avatar,
+  Badge,
   Box,
-  Card,
-  CardContent,
-  Chip,
+  CssBaseline,
   Divider,
-  Grid,
-  Paper,
-  Stack,
+  Drawer,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
   Typography,
 } from "@mui/material";
 
-import {
-  PeopleAlt,
-  PersonAddAlt1,
-  Logout,
-  Today,
-  CalendarMonth,
-  Circle,
-} from "@mui/icons-material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import PeopleIcon from "@mui/icons-material/People";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import LoginIcon from "@mui/icons-material/Login";
+import HistoryIcon from "@mui/icons-material/History";
+import GroupIcon from "@mui/icons-material/Group";
 
-import { PieChart } from "@mui/x-charts/PieChart";
+import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import ShieldIcon from "@mui/icons-material/Shield";
 
-import { getDashboardStats } from "../services/dashboardService";
+const drawerWidth = 270;
 
-const Dashboard = () => {
+const menuItemStyle = {
+  mx: 2,
+  my: 0.7,
+  px: 2,
+  height: 56,
+  borderRadius: "16px",
+  color: "#D1D5DB",
+  transition: ".25s",
+
+  "& .MuiListItemIcon-root": {
+    color: "#D1D5DB",
+    minWidth: 42,
+  },
+
+  "&:hover": {
+    background:
+      "linear-gradient(90deg,#3B82F6,#2563EB)",
+
+    color: "#fff",
+
+    transform: "translateX(4px)",
+
+    boxShadow:
+      "0 8px 18px rgba(37,99,235,.35)",
+  },
+
+  "&:hover .MuiListItemIcon-root": {
+    color: "#fff",
+  },
+
+  "&.Mui-selected": {
+    background:
+      "linear-gradient(90deg,#3B82F6,#2563EB)",
+
+    color: "#fff",
+
+    boxShadow:
+      "0 8px 18px rgba(37,99,235,.35)",
+  },
+
+  "&.Mui-selected .MuiListItemIcon-root": {
+    color: "#fff",
+  },
+};
+
+const DashboardLayout = () => {
+
+  const navigate = useNavigate();
+
+  const location = useLocation();
 
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const [stats, setStats] = useState({
-    TotalVisitors: 0,
-    ActiveVisitors: 0,
-    TodayVisits: 0,
-    CheckedOutToday: 0,
-  });
+    return (
+    <Box sx={{ display: "flex", bgcolor: "#F4F7FC" }}>
+      <CssBaseline />
 
-  useEffect(() => {
+      {/* ================= SIDEBAR ================= */}
 
-    loadDashboard();
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
 
-    const interval = setInterval(() => {
-      loadDashboard();
-    }, 30000);
+          "& .MuiDrawer-paper": {
+            width: drawerWidth,
+            boxSizing: "border-box",
+            background:
+              "linear-gradient(180deg,#111827,#0F172A)",
 
-    return () => clearInterval(interval);
+            color: "#fff",
 
-  }, []);
+            borderRight: "none",
 
-  const loadDashboard = async () => {
-
-    try {
-
-      const res = await getDashboardStats();
-
-      setStats(res.data);
-
-    } catch (err) {
-
-      console.log(err);
-
-    }
-
-  };
-
-  const cards = [
-
-    {
-      title: "Total Visitors",
-      value: stats.TotalVisitors,
-      subtitle: "All time visitors",
-      color: "#2563EB",
-      icon: <PeopleAlt />,
-    },
-
-    {
-      title: "Active Visitors",
-      value: stats.ActiveVisitors,
-      subtitle: "Currently inside",
-      color: "#22C55E",
-      icon: <PersonAddAlt1 />,
-    },
-
-    {
-      title: "Today's Visits",
-      value: stats.TodayVisits,
-      subtitle: "Today's entries",
-      color: "#F59E0B",
-      icon: <Today />,
-    },
-
-    {
-      title: "Checked Out",
-      value: stats.CheckedOutToday,
-      subtitle: "Completed visits",
-      color: "#EF4444",
-      icon: <Logout />,
-    },
-
-  ];
-
-  const chartData = [
-
-    {
-      id: 0,
-      value: stats.ActiveVisitors,
-      label: "Active",
-      color: "#2563EB",
-    },
-
-    {
-      id: 1,
-      value: stats.CheckedOutToday,
-      label: "Checked Out",
-      color: "#F59E0B",
-    },
-
-  ];
-
-  return (
-
-    <Box
-      sx={{
-        width: "100%",
-        maxWidth: "100%",
-      }}
-    >
-
-          {/* ================= Header ================= */}
-
-      <Stack
-        direction={{ xs: "column", lg: "row" }}
-        justifyContent="space-between"
-        alignItems={{ xs: "flex-start", lg: "center" }}
-        spacing={2}
-        mb={5}
+            display: "flex",
+            justifyContent: "space-between",
+          },
+        }}
       >
 
         <Box>
 
-          <Typography
-            variant="h3"
-            fontWeight={700}
-          >
-            Welcome Back, {user?.fullName} 👋
-          </Typography>
+          {/* LOGO */}
 
-          <Typography
-            color="text.secondary"
-            mt={1}
-            fontSize={17}
-          >
-            Here's what's happening with your visitor management today.
-          </Typography>
-
-        </Box>
-
-        <Stack
-          direction="row"
-          spacing={2}
-        >
-
-          <Chip
-            icon={<CalendarMonth />}
-            label={new Date().toLocaleDateString()}
+          <Toolbar
             sx={{
-              height: 45,
-              px: 1,
-              fontSize: 15,
+              py: 2,
+              justifyContent: "center",
             }}
-          />
-
-          <Chip
-            color="success"
-            icon={<Circle sx={{ fontSize: 12 }} />}
-            label="Live Dashboard"
-            sx={{
-              height: 45,
-              px: 1,
-              fontSize: 15,
-            }}
-          />
-
-        </Stack>
-
-      </Stack>
-
-      {/* ================= Top Cards ================= */}
-
-      <Grid
-        container
-        spacing={3}
-        sx={{
-          mb: 4,
-        }}
-      >
-
-        {cards.map((card) => (
-
-          <Grid
-            key={card.title}
-            size={{ xs: 12, sm: 6, md: 3 }}
           >
 
-            <Card
-              elevation={0}
+            <ShieldIcon
               sx={{
-                borderRadius: 4,
-                border: `2px solid ${card.color}20`,
-                transition: ".25s",
-                height: "100%",
-
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: "0 10px 30px rgba(0,0,0,.08)",
-                },
+                fontSize: 42,
+                color: "#60A5FA",
+                mr: 1.5,
               }}
-            >
-
-              <CardContent>
-
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-
-                  <Box>
-
-                    <Typography
-                      color="text.secondary"
-                    >
-                      {card.title}
-                    </Typography>
-
-                    <Typography
-                      variant="h3"
-                      fontWeight={700}
-                      mt={1}
-                    >
-                      {card.value}
-                    </Typography>
-
-                    <Typography
-                      color="text.secondary"
-                      mt={1}
-                    >
-                      {card.subtitle}
-                    </Typography>
-
-                  </Box>
-
-                  <Avatar
-                    sx={{
-                      bgcolor: card.color,
-                      width: 62,
-                      height: 62,
-                    }}
-                  >
-                    {card.icon}
-                  </Avatar>
-
-                </Stack>
-
-              </CardContent>
-
-            </Card>
-
-          </Grid>
-
-        ))}
-
-      </Grid>
-
-            {/* ================= Analytics ================= */}
-
-      <Grid container spacing={3}>
-
-        <Grid size={{ xs: 12, lg: 8 }}>
-
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              border: "1px solid #E5E7EB",
-              height: 430,
-            }}
-          >
+            />
 
             <Typography
-              variant="h5"
-              fontWeight={700}
-            >
-              Visitor Analytics
-            </Typography>
-
-            <Typography
-              color="text.secondary"
-              mb={3}
-            >
-              Today's Visitor Distribution
-            </Typography>
-
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              height={300}
-            >
-
-              <PieChart
-                width={500}
-                height={280}
-                series={[
-                  {
-                    data: chartData,
-                    innerRadius: 70,
-                    outerRadius: 110,
-                    paddingAngle: 4,
-                    cornerRadius: 6,
-                  },
-                ]}
-              />
-
-            </Box>
-
-          </Paper>
-
-        </Grid>
-
-        <Grid size={{ xs: 12, lg: 4 }}>
-
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              border: "1px solid #E5E7EB",
-              height: 430,
-            }}
-          >
-
-            <Typography
-              variant="h5"
-              fontWeight={700}
-            >
-              Today's Summary
-            </Typography>
-
-            <Divider sx={{ my: 3 }} />
-
-            <Stack spacing={3}>
-
-              <Box
-                display="flex"
-                justifyContent="space-between"
-              >
-                <Typography color="text.secondary">
-                  Total Visitors
-                </Typography>
-
-                <Typography
-                  fontWeight={700}
-                  fontSize={22}
-                >
-                  {stats.TotalVisitors}
-                </Typography>
-              </Box>
-
-              <Divider />
-
-              <Box
-                display="flex"
-                justifyContent="space-between"
-              >
-                <Typography color="text.secondary">
-                  Active Visitors
-                </Typography>
-
-                <Typography
-                  color="success.main"
-                  fontWeight={700}
-                  fontSize={22}
-                >
-                  {stats.ActiveVisitors}
-                </Typography>
-              </Box>
-
-              <Divider />
-
-              <Box
-                display="flex"
-                justifyContent="space-between"
-              >
-                <Typography color="text.secondary">
-                  Today's Visits
-                </Typography>
-
-                <Typography
-                  color="warning.main"
-                  fontWeight={700}
-                  fontSize={22}
-                >
-                  {stats.TodayVisits}
-                </Typography>
-              </Box>
-
-              <Divider />
-
-              <Box
-                display="flex"
-                justifyContent="space-between"
-              >
-                <Typography color="text.secondary">
-                  Checked Out
-                </Typography>
-
-                <Typography
-                  color="error.main"
-                  fontWeight={700}
-                  fontSize={22}
-                >
-                  {stats.CheckedOutToday}
-                </Typography>
-              </Box>
-
-            </Stack>
-
-          </Paper>
-
-        </Grid>
-
-      </Grid>
-
-            {/* ================= Bottom Section ================= */}
-
-      <Grid
-        container
-        spacing={3}
-        sx={{ mt: 1 }}
-      >
-
-        {/* Recent Activity */}
-
-        <Grid size={{ xs: 12, md: 6 }}>
-
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              border: "1px solid #E5E7EB",
-              height: "100%",
-            }}
-          >
-
-            <Typography
-              variant="h5"
-              fontWeight={700}
-            >
-              Recent Activity
-            </Typography>
-
-            <Divider sx={{ my: 3 }} />
-
-            <Stack spacing={3}>
-
-              <Box display="flex" justifyContent="space-between">
-                <Typography color="text.secondary">
-                  Registered Visitors
-                </Typography>
-
-                <Typography fontWeight={700}>
-                  {stats.TotalVisitors}
-                </Typography>
-              </Box>
-
-              <Divider />
-
-              <Box display="flex" justifyContent="space-between">
-                <Typography color="text.secondary">
-                  Visitors Inside
-                </Typography>
-
-                <Typography
-                  fontWeight={700}
-                  color="success.main"
-                >
-                  {stats.ActiveVisitors}
-                </Typography>
-              </Box>
-
-              <Divider />
-
-              <Box display="flex" justifyContent="space-between">
-                <Typography color="text.secondary">
-                  Today's Entries
-                </Typography>
-
-                <Typography
-                  fontWeight={700}
-                  color="warning.main"
-                >
-                  {stats.TodayVisits}
-                </Typography>
-              </Box>
-
-              <Divider />
-
-              <Box display="flex" justifyContent="space-between">
-                <Typography color="text.secondary">
-                  Checked Out
-                </Typography>
-
-                <Typography
-                  fontWeight={700}
-                  color="error.main"
-                >
-                  {stats.CheckedOutToday}
-                </Typography>
-              </Box>
-
-            </Stack>
-
-          </Paper>
-
-        </Grid>
-
-        {/* Quick Overview */}
-
-        <Grid size={{ xs: 12, md: 6 }}>
-
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: 4,
-              border: "1px solid #E5E7EB",
-              height: "100%",
-            }}
-          >
-
-            <Typography
-              variant="h5"
-              fontWeight={700}
-            >
-              Quick Overview
-            </Typography>
-
-            <Divider sx={{ my: 3 }} />
-
-            <Stack spacing={2}>
-
-              <Typography>
-                👥 Total Visitors :
-                <b> {stats.TotalVisitors}</b>
-              </Typography>
-
-              <Typography>
-                🟢 Active Visitors :
-                <b> {stats.ActiveVisitors}</b>
-              </Typography>
-
-              <Typography>
-                📅 Today's Visits :
-                <b> {stats.TodayVisits}</b>
-              </Typography>
-
-              <Typography>
-                🚪 Checked Out :
-                <b> {stats.CheckedOutToday}</b>
-              </Typography>
-
-            </Stack>
-
-          </Paper>
-
-        </Grid>
-
-      </Grid>
-
-      {/* Footer */}
-
-      <Paper
-        elevation={0}
-        sx={{
-          mt: 4,
-          p: 3,
-          borderRadius: 4,
-          background:
-            "linear-gradient(135deg,#2563EB,#1D4ED8)",
-          color: "#fff",
-        }}
-      >
-
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-
-          <Box>
-
-            <Typography
-              variant="h5"
-              fontWeight={700}
+              variant="h4"
+              fontWeight="bold"
             >
               VisitorPro
             </Typography>
 
-            <Typography sx={{ opacity: .9 }}>
-              Smart Visitor Management System
+          </Toolbar>
+
+          <Divider sx={{ borderColor: "#1F2937" }} />
+
+          {/* MENU */}
+
+          <List sx={{ mt: 2 }}>
+
+            <ListItemButton
+              sx={menuItemStyle}
+              selected={location.pathname === "/dashboard"}
+              onClick={() => navigate("/dashboard")}
+            >
+              <ListItemIcon>
+                <DashboardIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Dashboard" />
+            </ListItemButton>
+
+            <ListItemButton
+              sx={menuItemStyle}
+              selected={location.pathname === "/visitors"}
+              onClick={() => navigate("/visitors")}
+            >
+              <ListItemIcon>
+                <PeopleIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Visitors" />
+            </ListItemButton>
+
+            <ListItemButton
+              sx={menuItemStyle}
+              selected={location.pathname === "/active-visits"}
+              onClick={() => navigate("/active-visits")}
+            >
+              <ListItemIcon>
+                <VisibilityIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Active Visits" />
+            </ListItemButton>
+
+                        <ListItemButton
+              sx={menuItemStyle}
+              selected={location.pathname === "/checkin"}
+              onClick={() => navigate("/checkin")}
+            >
+              <ListItemIcon>
+                <LoginIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Check In" />
+            </ListItemButton>
+
+            <ListItemButton
+              sx={menuItemStyle}
+              selected={location.pathname === "/visit-history"}
+              onClick={() => navigate("/visit-history")}
+            >
+              <ListItemIcon>
+                <HistoryIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Visit History" />
+            </ListItemButton>
+
+            <ListItemButton
+              sx={menuItemStyle}
+              selected={location.pathname === "/users"}
+              onClick={() => navigate("/users")}
+            >
+              <ListItemIcon>
+                <GroupIcon />
+              </ListItemIcon>
+
+              <ListItemText primary="Users" />
+            </ListItemButton>
+
+          </List>
+
+        </Box>
+
+        {/* Bottom Profile */}
+
+        <Box sx={{ p: 2 }}>
+
+          <Divider sx={{ borderColor: "#1F2937", mb: 2 }} />
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              background: "rgba(255,255,255,.05)",
+              borderRadius: "16px",
+              p: 1.5,
+            }}
+          >
+
+            <Avatar
+              sx={{
+                bgcolor: "#2563EB",
+                mr: 1.5,
+              }}
+            >
+              {user?.fullName?.charAt(0)}
+            </Avatar>
+
+            <Box sx={{ flexGrow: 1 }}>
+
+              <Typography
+                fontWeight={700}
+                color="#fff"
+              >
+                {user?.fullName}
+              </Typography>
+
+              <Typography
+                variant="body2"
+                color="#94A3B8"
+              >
+                Administrator
+              </Typography>
+
+            </Box>
+
+          </Box>
+
+        </Box>
+
+      </Drawer>
+
+      {/* ================= TOP NAVBAR ================= */}
+
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          width: `calc(100% - ${drawerWidth}px)`,
+          ml: `${drawerWidth}px`,
+          bgcolor: "#fff",
+          color: "#111827",
+          borderBottom: "1px solid #E5E7EB",
+        }}
+      >
+
+        <Toolbar>
+
+          <IconButton>
+
+            <MenuIcon />
+
+          </IconButton>
+
+          <Typography
+            variant="h5"
+            fontWeight="700"
+            sx={{
+              ml: 2,
+              flexGrow: 1,
+            }}
+          >
+            Dashboard
+          </Typography>
+
+                    <Badge
+            badgeContent={3}
+            color="error"
+            sx={{ mr: 3 }}
+          >
+            <NotificationsNoneIcon fontSize="medium" />
+          </Badge>
+
+          <Avatar
+            sx={{
+              bgcolor: "#2563EB",
+              width: 42,
+              height: 42,
+              mr: 1.5,
+            }}
+          >
+            {user?.fullName?.charAt(0)}
+          </Avatar>
+
+          <Box sx={{ mr: 1 }}>
+
+            <Typography
+              fontWeight={700}
+              lineHeight={1.2}
+            >
+              {user?.fullName}
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color="text.secondary"
+            >
+              Administrator
             </Typography>
 
           </Box>
 
-          <Chip
-            label="System Online"
-            color="success"
-          />
+          <KeyboardArrowDownIcon />
 
-        </Stack>
+        </Toolbar>
 
-      </Paper>
+      </AppBar>
+
+      {/* ================= MAIN CONTENT ================= */}
+
+     <Box
+  component="main"
+  sx={{
+    flexGrow: 1,
+    mt: "72px",
+    p: 3,
+    minHeight: "100vh",
+    width: `calc(100% - ${drawerWidth}px)`,
+    background:
+      "linear-gradient(180deg,#F8FAFC,#EEF3FB)",
+  }}
+>
+
+        <Outlet />
+
+      </Box>
 
     </Box>
 
-  );
-
+      );
 };
 
-export default Dashboard;
+export default DashboardLayout;

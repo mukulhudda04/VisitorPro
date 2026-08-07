@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import { PieChart } from "@mui/x-charts/PieChart";
+
+
 
 import {
   Avatar,
@@ -7,11 +10,12 @@ import {
   CardContent,
   Chip,
   Divider,
-  Grid,
   Paper,
   Stack,
   Typography,
 } from "@mui/material";
+
+import Grid from "@mui/material/Grid";
 
 import {
   PeopleAlt,
@@ -22,7 +26,6 @@ import {
   Circle,
 } from "@mui/icons-material";
 
-import { PieChart } from "@mui/x-charts/PieChart";
 
 import { getDashboardStats } from "../../services/dashboardService";
 
@@ -199,24 +202,39 @@ const Dashboard = () => {
 
         {cards.map((card) => (
 
-          <Grid
-            key={card.title}
-            size={{ xs: 12, sm: 6, md: 3 }}
-          >
+<Grid
+  key={card.title}
+  size={{
+    xs: 12,
+    sm: 6,
+    md: 3,
+  }}
+>
 
             <Card
               elevation={0}
               sx={{
-                borderRadius: 4,
-                border: `2px solid ${card.color}20`,
-                transition: ".25s",
-                height: "100%",
+  borderRadius: "24px",
 
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: "0 10px 30px rgba(0,0,0,.08)",
-                },
-              }}
+  border: `1px solid ${card.color}25`,
+
+  background:
+"linear-gradient(180deg,#ffffff,#fbfcff)",
+
+  overflow: "hidden",
+
+  transition: "0.3s",
+
+  height: "100%",
+
+  boxShadow: "0 10px 25px rgba(0,0,0,.06)",
+
+  "&:hover": {
+    transform: "translateY(-8px)",
+
+    boxShadow: "0 18px 40px rgba(37,99,235,.15)",
+  },
+}}
             >
 
               <CardContent>
@@ -249,24 +267,50 @@ const Dashboard = () => {
                     >
                       {card.subtitle}
                     </Typography>
+                  
+                  <Box
+  sx={{
+    mt: 2,
+    width: "100%",
+    height: 8,
+    bgcolor: "#EEF2F7",
+    borderRadius: 999,
+    overflow: "hidden",
+  }}
+>
+  <Box
+    sx={{
+      width: `${Math.min(card.value * 25, 100)}%`,
+      height: "100%",
+      bgcolor: card.color,
+      borderRadius: 999,
+      boxShadow: `0 0 12px ${card.color}66`,
+transition: "all .4s ease",
+    }}
+  />
+</Box>
 
                   </Box>
 
                   <Avatar
-                    sx={{
-                      bgcolor: card.color,
-                      width: 62,
-                      height: 62,
-                    }}
-                  >
-                    {card.icon}
-                  </Avatar>
+  sx={{
+    width: 68,
+    height: 68,
+    bgcolor: `${card.color}15`,
+    color: card.color,
+    boxShadow: `0 8px 18px ${card.color}25`,
+  }}
+>
+  {card.icon}
+</Avatar>
 
                 </Stack>
 
-              </CardContent>
 
-            </Card>
+
+</CardContent>
+
+</Card>
 
           </Grid>
 
@@ -278,7 +322,12 @@ const Dashboard = () => {
 
       <Grid container spacing={3}>
 
-        <Grid size={{ xs: 12, lg: 8 }}>
+        <Grid
+  size={{
+    xs: 12,
+    lg: 8,
+  }}
+>
 
           <Paper
             elevation={0}
@@ -286,7 +335,9 @@ const Dashboard = () => {
               p: 3,
               borderRadius: 4,
               border: "1px solid #E5E7EB",
-              height: 430,
+              minHeight: 430,
+              height: "100%",
+              overflow: "hidden",
             }}
           >
 
@@ -331,7 +382,12 @@ const Dashboard = () => {
 
         </Grid>
 
-        <Grid size={{ xs: 12, lg: 4 }}>
+        <Grid
+  size={{
+    xs: 12,
+    lg: 4,
+  }}
+>
 
           <Paper
             elevation={0}
@@ -339,7 +395,9 @@ const Dashboard = () => {
               p: 3,
               borderRadius: 4,
               border: "1px solid #E5E7EB",
-              height: 430,
+              minHeight: 430,
+            height: "100%",
+            overflow: "hidden",
             }}
           >
 
@@ -445,7 +503,12 @@ const Dashboard = () => {
 
         {/* Recent Activity */}
 
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid
+  size={{
+    xs: 12,
+    lg: 4,
+  }}
+>
 
           <Paper
             elevation={0}
@@ -525,13 +588,18 @@ const Dashboard = () => {
 
             </Stack>
 
-          </Paper>
+          </Paper> 
 
         </Grid>
 
         {/* Quick Overview */}
 
-        <Grid size={{ xs: 12, md: 6 }}>
+        <Grid
+  size={{
+    xs: 12,
+    lg: 4,
+  }}
+>
 
           <Paper
             elevation={0}
@@ -554,25 +622,82 @@ const Dashboard = () => {
 
             <Stack spacing={2}>
 
-              <Typography>
-                👥 Total Visitors :
-                <b> {stats.TotalVisitors}</b>
-              </Typography>
+            {[
+  {
+    label: "Total Visitors",
+    value: stats.TotalVisitors,
+    color: "#2563EB",
+  },
+  {
+    label: "Active Visitors",
+    value: stats.ActiveVisitors,
+    color: "#22C55E",
+  },
+  {
+    label: "Today's Visits",
+    value: stats.TodayVisits,
+    color: "#F59E0B",
+  },
+  {
+    label: "Checked Out",
+    value: stats.CheckedOutToday,
+    color: "#EF4444",
+  },
+].map((item) => (
+  
+  <Box key={item.label}>
+    
+<Stack
+  direction="row"
+  justifyContent="space-between"
+  alignItems="center"
+  sx={{ mb: 1 }}
+>
+  <Typography
+    sx={{
+      fontWeight: 600,
+      fontSize: "15px",
+      color: "#374151",
+    }}
+  >
+    {item.label}
+  </Typography>
 
-              <Typography>
-                🟢 Active Visitors :
-                <b> {stats.ActiveVisitors}</b>
-              </Typography>
+  <Chip
+    label={item.value}
+    size="small"
+    sx={{
+      bgcolor: item.color,
+      color: "#fff",
+      fontWeight: 700,
+      minWidth: 34,
+      height: 26,
+      borderRadius: "8px",
+    }}
+  />
+</Stack>
 
-              <Typography>
-                📅 Today's Visits :
-                <b> {stats.TodayVisits}</b>
-              </Typography>
-
-              <Typography>
-                🚪 Checked Out :
-                <b> {stats.CheckedOutToday}</b>
-              </Typography>
+    <Box
+      sx={{
+        width: "100%",
+        height: 10,
+        borderRadius: 20,
+        bgcolor: "#E5E7EB",
+      }}
+    >
+      <Box
+        sx={{
+          width: `${Math.min(item.value * 25, 100)}%`,
+          height: "100%",
+          bgcolor: item.color,
+          borderRadius: 20,
+          transition: ".5s",
+          boxShadow: `0 0 10px ${item.color}55`,
+        }}
+      />
+    </Box>
+  </Box>
+))}
 
             </Stack>
 
@@ -580,55 +705,139 @@ const Dashboard = () => {
 
         </Grid>
 
-      </Grid>
+        
+<Grid
+  size={{
+    xs: 12,
+    lg: 4,
+  }}
+>
+  <Paper
+    elevation={0}
+    sx={{
+      p: 3,
+      borderRadius: 4,
+      border: "1px solid #E5E7EB",
+      height: "100%",
+    }}
+  >
+    <Typography variant="h5" fontWeight={700}>
+      Live Status
+    </Typography>
 
-      {/* Footer */}
+  <Divider sx={{ my: 3 }} />
 
-      <Paper
-        elevation={0}
-        sx={{
-          mt: 4,
-          p: 3,
-          borderRadius: 4,
-          background:
-            "linear-gradient(135deg,#2563EB,#1D4ED8)",
-          color: "#fff",
-        }}
+<Stack spacing={2}>
+
+  {[
+    {
+      name: "Rahul Sharma",
+      company: "Tech Mahindra",
+      status: "Inside",
+      color: "success",
+    },
+    {
+      name: "Aman Verma",
+      company: "Infosys",
+      status: "Checked Out",
+      color: "error",
+    },
+    {
+      name: "Priya Singh",
+      company: "TCS",
+      status: "Inside",
+      color: "success",
+    },
+  ].map((visitor) => (
+
+    <Paper
+      key={visitor.name}
+      elevation={0}
+      sx={{
+        p: 2,
+        borderRadius: 3,
+        bgcolor: "#F8FAFC",
+        border: "1px solid #EEF2F7",
+      }}
+    >
+
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
       >
 
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <Box>
 
-          <Box>
+          <Typography fontWeight={700}>
+            {visitor.name}
+          </Typography>
 
-            <Typography
-              variant="h5"
-              fontWeight={700}
-            >
-              VisitorPro
-            </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+          >
+            {visitor.company}
+          </Typography>
 
-            <Typography sx={{ opacity: .9 }}>
-              Smart Visitor Management System
-            </Typography>
+        </Box>
 
-          </Box>
+        <Chip
+          size="small"
+          color={visitor.color}
+          label={visitor.status}
+        />
 
-          <Chip
-            label="System Online"
-            color="success"
-          />
+      </Stack>
 
-        </Stack>
+    </Paper>
 
-      </Paper>
+  ))}
 
-    </Box>
+</Stack>
 
-  );
+</Paper>
+
+</Grid>
+
+</Grid>
+
+<Box
+  sx={{
+    mt: 4,
+    p: 4,
+    borderRadius: 6,
+    background: "linear-gradient(135deg,#2563EB,#1D4ED8)",
+    color: "#fff",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexWrap: "wrap",
+  }}
+>
+  <Box>
+    <Typography variant="h4" fontWeight={700}>
+      VisitorPro
+    </Typography>
+
+    <Typography sx={{ opacity: .9 }}>
+      Smart Visitor Management System
+    </Typography>
+  </Box>
+
+  <Chip
+    label="System Online"
+    color="success"
+    sx={{
+      fontWeight: 700,
+      px: 2,
+    }}
+  />
+</Box>
+
+</Box>
+
+);
 
 };
 
