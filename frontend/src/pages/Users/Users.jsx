@@ -242,7 +242,7 @@ const handleUpdateUser = async () => {
 
   try {
 
-    await updateUser(editingUserId, {
+    await updateUser(editingUserId,{
       fullName: formData.fullName,
       email: formData.email,
       phone: formData.phone,
