@@ -4,6 +4,7 @@ import Login from "../pages/Login/Login";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Visitors from "../pages/Visitors/Visitors";
 import Profile from "../pages/Profile/Profile";
+import Settings from "../pages/Settings/Settings";
 import ActiveVisits from "../pages/ActiveVisits/ActiveVisits";
 import CheckIn from "../pages/CheckIn/CheckIn";
 import VisitHistory from "../pages/VisitHistory/VisitHistory";
@@ -61,6 +62,12 @@ const AppRoutes = () => {
           path="/profile"
           element={<Profile />}
         />
+
+        <Route
+  path="/settings"
+  element={<Settings />}
+/>
+
       </Route>
     </Routes>
   );

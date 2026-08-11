@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { PieChart } from "@mui/x-charts/PieChart";
 
 import {
   Avatar,
@@ -11,6 +10,7 @@ import {
   Paper,
   Stack,
   Typography,
+  LinearProgress,
 } from "@mui/material";
 
 import Grid from "@mui/material/Grid";
@@ -23,6 +23,8 @@ import {
   CalendarMonth,
   Circle,
 } from "@mui/icons-material";
+
+import { PieChart } from "@mui/x-charts/PieChart";
 
 import { getDashboardStats } from "../../services/dashboardService";
 
@@ -49,7 +51,15 @@ const Dashboard = () => {
   const loadDashboard = async () => {
     try {
       const res = await getDashboardStats();
-      setStats(res.data);
+
+      setStats(
+        res.data || {
+          TotalVisitors: 0,
+          ActiveVisitors: 0,
+          TodayVisits: 0,
+          CheckedOutToday: 0,
+        }
+      );
     } catch (err) {
       console.log(err);
     }
@@ -101,261 +111,436 @@ const Dashboard = () => {
     },
   ];
 
+  const overview = [
+    {
+      label: "Total Visitors",
+      value: stats.TotalVisitors,
+      color: "#2563EB",
+    },
+    {
+      label: "Active Visitors",
+      value: stats.ActiveVisitors,
+      color: "#22C55E",
+    },
+    {
+      label: "Today's Visits",
+      value: stats.TodayVisits,
+      color: "#F59E0B",
+    },
+    {
+      label: "Checked Out",
+      value: stats.CheckedOutToday,
+      color: "#EF4444",
+    },
+  ];
+
+  const liveVisitors = [
+    {
+      name: "Rahul Sharma",
+      company: "Tech Mahindra",
+      status: "Inside",
+      color: "success",
+    },
+    {
+      name: "Aman Verma",
+      company: "Infosys",
+      status: "Checked Out",
+      color: "error",
+    },
+    {
+      name: "Priya Singh",
+      company: "TCS",
+      status: "Inside",
+      color: "success",
+    },
+  ];
+
+  const maxValue = Math.max(
+    Number(stats.TotalVisitors) || 0,
+    Number(stats.ActiveVisitors) || 0,
+    Number(stats.TodayVisits) || 0,
+    Number(stats.CheckedOutToday) || 0,
+    1
+  );
+
   return (
     <Box
       sx={{
         width: "100%",
         maxWidth: "100%",
+        minWidth: 0,
+        overflow: "hidden",
       }}
     >
-      {/* ================= Header ================= */}
+      {/* ================= HEADER ================= */}
+
       <Stack
         direction={{ xs: "column", lg: "row" }}
         justifyContent="space-between"
         alignItems={{ xs: "flex-start", lg: "center" }}
         spacing={2}
-        mb={5}
+        mb={{ xs: 3, md: 4 }}
+        sx={{
+          minWidth: 0,
+        }}
       >
-        <Box>
+        <Box
+          sx={{
+            minWidth: 0,
+            width: "100%",
+          }}
+        >
           <Typography
-  variant="h3"
-  fontWeight={600}
-  sx={{
-    fontSize: { xs: "2rem", md: "3rem" },
-    letterSpacing: "-1.5px",
-    lineHeight: 1.15,
-    whiteSpace: "nowrap",
-  }}
->
-  Welcome Back, {user?.fullName} 👋
-</Typography>
+            variant="h3"
+            fontWeight={800}
+            color="text.primary"
+            sx={{
+              fontSize: {
+                xs: "2rem",
+                sm: "2.5rem",
+                md: "2.8rem",
+                lg: "3.1rem",
+              },
+              lineHeight: 1.15,
+              wordBreak: "break-word",
+            }}
+          >
+            Welcome Back, {user?.fullName || "User"} 👋
+          </Typography>
 
           <Typography
-  color="text.secondary"
-  mt={1}
-  mb={2}
-  fontSize={17}
->
-  Here's what's happening with your visitor management today.
-</Typography>
+            color="text.secondary"
+            mt={1}
+            fontSize={{ xs: 14, sm: 17 }}
+          >
+            Here's what's happening with your visitor management today.
+          </Typography>
         </Box>
 
-        <Stack direction="row" spacing={2}>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          flexWrap="wrap"
+          useFlexGap
+          sx={{
+            width: { xs: "100%", lg: "auto" },
+            justifyContent: { xs: "flex-start", lg: "flex-end" },
+          }}
+        >
           <Chip
             icon={<CalendarMonth />}
-            label={new Date().toLocaleDateString()}
+            label={new Date().toLocaleDateString("en-GB")}
             sx={{
               height: 45,
               px: 1,
               fontSize: 15,
+              bgcolor: "background.paper",
+              color: "text.primary",
+              border: "1px solid",
+              borderColor: "divider",
+              "& .MuiChip-icon": {
+                color: "text.secondary",
+              },
             }}
           />
 
           <Chip
-            color="success"
             icon={<Circle sx={{ fontSize: 12 }} />}
             label="Live Dashboard"
             sx={{
               height: 45,
               px: 1,
               fontSize: 15,
+              bgcolor: "#22C55E",
+              color: "#fff",
+              "& .MuiChip-icon": {
+                color: "#0F172A",
+              },
             }}
           />
         </Stack>
       </Stack>
 
-      {/* ================= Top Cards ================= */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      {/* ================= STATISTIC CARDS ================= */}
+
+      <Grid container spacing={3}>
         {cards.map((card) => (
           <Grid
             key={card.title}
-            size={{
-              xs: 12,
-              sm: 6,
-              md: 3,
+            size={{ xs: 12, sm: 6, lg: 3 }}
+            sx={{
+              minWidth: 0,
             }}
           >
             <Card
               elevation={0}
               sx={{
-                borderRadius: "24px",
-                border: `1px solid ${card.color}25`,
-                background: "linear-gradient(145deg, #FFFFFF, #F8FAFC)",
-                overflow: "hidden",
-                transition: "all 0.3s ease",
-                height: "100%",
-                boxShadow: "0 8px 24px rgba(15,23,42,0.06)",
+                width: "100%",
+                minWidth: 0,
+                height: { xs: "auto", sm: 175 },
+                minHeight: 175,
+                borderRadius: 4,
+                border: "1px solid",
+                borderColor: `${card.color}55`,
+                bgcolor: "background.paper",
+                boxShadow: "0 10px 30px rgba(15,23,42,.08)",
+                transition:
+                  "transform .25s ease, box-shadow .25s ease",
                 "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: `0 18px 40px ${card.color}22`,
-                  borderColor: `${card.color}45`,
+                  transform: "translateY(-5px)",
+                  boxShadow:
+                    "0 18px 40px rgba(15,23,42,.14)",
                 },
               }}
             >
-              <CardContent>
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
+              <CardContent
+                sx={{
+                  height: "100%",
+                  minWidth: 0,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 2,
+                  p: 2.5,
+                  "&:last-child": {
+                    pb: 2.5,
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    minWidth: 0,
+                    flex: 1,
+                  }}
                 >
-                  <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography color="text.secondary">
-                      {card.title}
-                    </Typography>
+                  <Typography
+                    color="text.secondary"
+                    fontSize={15}
+                    fontWeight={650}
+                    noWrap
+                  >
+                    {card.title}
+                  </Typography>
 
-                    <Typography variant="h3" fontWeight={700} mt={1}>
-                      {card.value}
-                    </Typography>
+                  <Typography
+                    variant="h3"
+                    fontWeight={850}
+                    color="text.primary"
+                    mt={0.5}
+                  >
+                    {card.value}
+                  </Typography>
 
-                    <Typography color="text.secondary" mt={1}>
-                      {card.subtitle}
-                    </Typography>
+                  <Typography
+                    mt={0.8}
+                    color="text.secondary"
+                    fontSize={14}
+                    noWrap
+                  >
+                    {card.subtitle}
+                  </Typography>
 
-                    <Box
-                      sx={{
-                        mt: 2,
-                        width: "100%",
-                        height: 8,
-                        bgcolor: "#EEF2F7",
-                        borderRadius: 999,
-                        overflow: "hidden",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: `${Math.min(card.value * 25, 100)}%`,
-                          height: "100%",
-                          bgcolor: card.color,
-                          borderRadius: 999,
-                          boxShadow: `0 0 12px ${card.color}66`,
-                          transition: "all .4s ease",
-                        }}
-                      />
-                    </Box>
-                  </Box>
-
-                  <Avatar
+                  <Box
                     sx={{
-                      width: 64,
-                      height: 64,
-                      ml: 2,
-                      flexShrink: 0,
-                      bgcolor: `${card.color}12`,
-                      color: card.color,
-                      border: `1px solid ${card.color}25`,
-                      boxShadow: `0 8px 20px ${card.color}20`,
-                      transition: "all .3s ease",
-                      "&:hover": {
-                        transform: "scale(1.08) rotate(3deg)",
-                        boxShadow: `0 10px 25px ${card.color}35`,
-                      },
+                      mt: 1.5,
+                      width: "100%",
+                      maxWidth: 150,
                     }}
                   >
-                    {card.icon}
-                  </Avatar>
-                </Stack>
+                    <LinearProgress
+                      variant="determinate"
+                      value={Math.min(
+                        (Number(card.value) / maxValue) * 100,
+                        100
+                      )}
+                      sx={{
+                        height: 6,
+                        borderRadius: 5,
+                        bgcolor: "action.hover",
+                        "& .MuiLinearProgress-bar": {
+                          bgcolor: card.color,
+                          borderRadius: 5,
+                        },
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                <Avatar
+                  sx={{
+                    width: { xs: 55, sm: 65, md: 70 },
+                    height: { xs: 55, sm: 65, md: 70 },
+                    flexShrink: 0,
+                    bgcolor: `${card.color}18`,
+                    color: card.color,
+                    border: `1px solid ${card.color}40`,
+                  }}
+                >
+                  {card.icon}
+                </Avatar>
               </CardContent>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-      {/* ================= Analytics ================= */}
-      <Grid container spacing={3}>
+      {/* ================= ANALYTICS + SUMMARY ================= */}
+
+      <Grid container spacing={3} sx={{ mt: 0.5 }}>
         <Grid
-          size={{
-            xs: 12,
-            lg: 8,
+          size={{ xs: 12, lg: 8 }}
+          sx={{
+            minWidth: 0,
           }}
         >
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              width: "100%",
+              minWidth: 0,
+              p: { xs: 2, md: 3 },
               borderRadius: 4,
-              border: "1px solid #E5E7EB",
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
               minHeight: 430,
               height: "100%",
               overflow: "hidden",
             }}
           >
-            <Typography variant="h5" fontWeight={700}>
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              color="text.primary"
+            >
               Visitor Analytics
             </Typography>
 
-            <Typography color="text.secondary" mb={3}>
+            <Typography
+              color="text.secondary"
+              mb={2}
+            >
               Today's Visitor Distribution
             </Typography>
 
             <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              height={300}
+              sx={{
+                width: "100%",
+                maxWidth: "100%",
+                height: 320,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                overflow: "hidden",
+              }}
             >
-              <PieChart
-                width={500}
-                height={280}
-                series={[
-                  {
-                    data: chartData,
-                    innerRadius: 70,
-                    outerRadius: 110,
-                    paddingAngle: 4,
-                    cornerRadius: 6,
-                  },
-                ]}
-              />
+              <Box
+                sx={{
+                  width: "100%",
+                  maxWidth: 500,
+                  height: 300,
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <PieChart
+                  width={500}
+                  height={300}
+                  series={[
+                    {
+                      data: chartData,
+                      innerRadius: 70,
+                      outerRadius: 120,
+                      paddingAngle: 5,
+                      cornerRadius: 8,
+                    },
+                  ]}
+                  sx={{
+                    maxWidth: "100%",
+                  }}
+                />
+              </Box>
             </Box>
           </Paper>
         </Grid>
 
         <Grid
-          size={{
-            xs: 12,
-            lg: 4,
+          size={{ xs: 12, lg: 4 }}
+          sx={{
+            minWidth: 0,
           }}
         >
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              width: "100%",
+              minWidth: 0,
+              p: { xs: 2, md: 3 },
               borderRadius: 4,
-              border: "1px solid #E5E7EB",
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
               minHeight: 430,
               height: "100%",
-              overflow: "hidden",
             }}
           >
-            <Typography variant="h5" fontWeight={700}>
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              color="text.primary"
+            >
               Today's Summary
             </Typography>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 2.5 }} />
 
-            <Stack spacing={3}>
-              {[
-                ["Total Visitors", stats.TotalVisitors, "text.primary"],
-                ["Active Visitors", stats.ActiveVisitors, "success.main"],
-                ["Today's Visits", stats.TodayVisits, "warning.main"],
-                ["Checked Out", stats.CheckedOutToday, "error.main"],
-              ].map(([label, value, color]) => (
-                <Box key={label}>
-                  <Box
-                    display="flex"
+            <Stack spacing={2.2}>
+              {overview.map((item) => (
+                <Box key={item.label}>
+                  <Stack
+                    direction="row"
                     justifyContent="space-between"
                     alignItems="center"
+                    mb={0.8}
+                    gap={2}
                   >
-                    <Typography color="text.secondary">{label}</Typography>
                     <Typography
-                      color={color}
-                      fontWeight={700}
-                      fontSize={22}
+                      color="text.secondary"
+                      fontWeight={600}
+                      sx={{
+                        minWidth: 0,
+                      }}
                     >
-                      {value}
+                      {item.label}
                     </Typography>
-                  </Box>
-                  {label !== "Checked Out" && <Divider sx={{ mt: 3 }} />}
+
+                    <Typography
+                      fontWeight={850}
+                      fontSize={22}
+                      color={item.color}
+                      flexShrink={0}
+                    >
+                      {item.value}
+                    </Typography>
+                  </Stack>
+
+                  <LinearProgress
+                    variant="determinate"
+                    value={Math.min(
+                      (Number(item.value) / maxValue) * 100,
+                      100
+                    )}
+                    sx={{
+                      height: 7,
+                      borderRadius: 5,
+                      bgcolor: "action.hover",
+                      "& .MuiLinearProgress-bar": {
+                        bgcolor: item.color,
+                        borderRadius: 5,
+                      },
+                    }}
+                  />
                 </Box>
               ))}
             </Stack>
@@ -363,36 +548,51 @@ const Dashboard = () => {
         </Grid>
       </Grid>
 
-      {/* ================= Bottom Section ================= */}
-      <Grid container spacing={3} sx={{ mt: 1 }}>
+      {/* ================= BOTTOM SECTION ================= */}
+
+      <Grid container spacing={3} sx={{ mt: 0.5 }}>
         {/* Recent Activity */}
+
         <Grid
-          size={{
-            xs: 12,
-            lg: 4,
+          size={{ xs: 12, lg: 4 }}
+          sx={{
+            minWidth: 0,
           }}
         >
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              width: "100%",
+              minWidth: 0,
+              p: { xs: 2, md: 3 },
               borderRadius: 4,
-              border: "1px solid #E5E7EB",
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
               height: "100%",
             }}
           >
-            <Typography variant="h5" fontWeight={700}>
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              color="text.primary"
+            >
               Recent Activity
             </Typography>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 2.5 }} />
 
-            <Stack spacing={3}>
+            <Stack spacing={2.5}>
               <Box>
                 <Typography color="text.secondary">
                   Registered Visitors
                 </Typography>
-                <Typography fontWeight={700}>
+
+                <Typography
+                  fontWeight={800}
+                  fontSize={22}
+                  color="text.primary"
+                >
                   {stats.TotalVisitors}
                 </Typography>
               </Box>
@@ -403,7 +603,12 @@ const Dashboard = () => {
                 <Typography color="text.secondary">
                   Visitors Inside
                 </Typography>
-                <Typography fontWeight={700} color="success.main">
+
+                <Typography
+                  fontWeight={800}
+                  fontSize={22}
+                  color="success.main"
+                >
                   {stats.ActiveVisitors}
                 </Typography>
               </Box>
@@ -414,7 +619,12 @@ const Dashboard = () => {
                 <Typography color="text.secondary">
                   Today's Entries
                 </Typography>
-                <Typography fontWeight={700} color="warning.main">
+
+                <Typography
+                  fontWeight={800}
+                  fontSize={22}
+                  color="warning.main"
+                >
                   {stats.TodayVisits}
                 </Typography>
               </Box>
@@ -425,7 +635,12 @@ const Dashboard = () => {
                 <Typography color="text.secondary">
                   Checked Out
                 </Typography>
-                <Typography fontWeight={700} color="error.main">
+
+                <Typography
+                  fontWeight={800}
+                  fontSize={22}
+                  color="error.main"
+                >
                   {stats.CheckedOutToday}
                 </Typography>
               </Box>
@@ -434,172 +649,183 @@ const Dashboard = () => {
         </Grid>
 
         {/* Quick Overview */}
+
         <Grid
-          size={{
-            xs: 12,
-            lg: 4,
+          size={{ xs: 12, lg: 4 }}
+          sx={{
+            minWidth: 0,
           }}
         >
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              width: "100%",
+              minWidth: 0,
+              p: { xs: 2, md: 3 },
               borderRadius: 4,
-              border: "1px solid #E5E7EB",
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
               height: "100%",
             }}
           >
-            <Typography variant="h5" fontWeight={700}>
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              color="text.primary"
+            >
               Quick Overview
             </Typography>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 2.5 }} />
 
             <Stack spacing={2}>
-              {[
-                {
-                  label: "Total Visitors",
-                  value: stats.TotalVisitors,
-                  color: "#2563EB",
-                },
-                {
-                  label: "Active Visitors",
-                  value: stats.ActiveVisitors,
-                  color: "#22C55E",
-                },
-                {
-                  label: "Today's Visits",
-                  value: stats.TodayVisits,
-                  color: "#F59E0B",
-                },
-                {
-                  label: "Checked Out",
-                  value: stats.CheckedOutToday,
-                  color: "#EF4444",
-                },
-              ].map((item) => (
-                <Box key={item.label}>
+              {overview.map((item) => (
+                <Stack
+                  key={item.label}
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  gap={2}
+                  sx={{
+                    p: 1.4,
+                    borderRadius: 2.5,
+                    bgcolor: "action.hover",
+                    minWidth: 0,
+                  }}
+                >
                   <Stack
                     direction="row"
-                    justifyContent="space-between"
                     alignItems="center"
-                    sx={{ mb: 1 }}
-                  >
-                    <Typography
-                      sx={{
-                        fontWeight: 600,
-                        fontSize: "15px",
-                        color: "#374151",
-                      }}
-                    >
-                      {item.label}
-                    </Typography>
-
-                    <Chip
-                      label={item.value}
-                      size="small"
-                      sx={{
-                        bgcolor: item.color,
-                        color: "#fff",
-                        fontWeight: 700,
-                        minWidth: 34,
-                        height: 26,
-                        borderRadius: "8px",
-                      }}
-                    />
-                  </Stack>
-
-                  <Box
+                    spacing={1}
                     sx={{
-                      width: "100%",
-                      height: 10,
-                      borderRadius: 20,
-                      bgcolor: "#E5E7EB",
+                      minWidth: 0,
                     }}
                   >
                     <Box
                       sx={{
-                        width: `${Math.min(item.value * 25, 100)}%`,
-                        height: "100%",
+                        width: 9,
+                        height: 9,
+                        minWidth: 9,
+                        borderRadius: "50%",
                         bgcolor: item.color,
-                        borderRadius: 20,
-                        transition: ".5s",
-                        boxShadow: `0 0 10px ${item.color}55`,
                       }}
                     />
-                  </Box>
-                </Box>
+
+                    <Typography
+                      color="text.secondary"
+                      fontWeight={600}
+                      noWrap
+                    >
+                      {item.label}
+                    </Typography>
+                  </Stack>
+
+                  <Typography
+                    fontWeight={850}
+                    color="text.primary"
+                    flexShrink={0}
+                  >
+                    {item.value}
+                  </Typography>
+                </Stack>
               ))}
             </Stack>
           </Paper>
         </Grid>
 
         {/* Live Status */}
+
         <Grid
-          size={{
-            xs: 12,
-            lg: 4,
+          size={{ xs: 12, lg: 4 }}
+          sx={{
+            minWidth: 0,
           }}
         >
           <Paper
             elevation={0}
             sx={{
-              p: 3,
+              width: "100%",
+              minWidth: 0,
+              p: { xs: 2, md: 3 },
               borderRadius: 4,
-              border: "1px solid #E5E7EB",
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
               height: "100%",
             }}
           >
-            <Typography variant="h5" fontWeight={700}>
+            <Typography
+              variant="h5"
+              fontWeight={800}
+              color="text.primary"
+            >
               Live Status
             </Typography>
 
-            <Divider sx={{ my: 3 }} />
+            <Divider sx={{ my: 2.5 }} />
 
-            <Stack spacing={2}>
-              {[
-                {
-                  name: "Rahul Sharma",
-                  company: "Tech Mahindra",
-                  status: "Inside",
-                  color: "success",
-                },
-                {
-                  name: "Aman Verma",
-                  company: "Infosys",
-                  status: "Checked Out",
-                  color: "error",
-                },
-                {
-                  name: "Priya Singh",
-                  company: "TCS",
-                  status: "Inside",
-                  color: "success",
-                },
-              ].map((visitor) => (
-                <Paper
+            <Stack spacing={1.5}>
+              {liveVisitors.map((visitor) => (
+                <Box
                   key={visitor.name}
-                  elevation={0}
                   sx={{
-                    p: 2,
+                    width: "100%",
+                    minWidth: 0,
+                    p: 1.5,
                     borderRadius: 3,
-                    bgcolor: "#F8FAFC",
-                    border: "1px solid #EEF2F7",
+                    bgcolor: "action.hover",
+                    border: "1px solid",
+                    borderColor: "divider",
                   }}
                 >
+                  {/* Important: responsive layout prevents overlap */}
                   <Stack
-                    direction="row"
+                    direction={{
+                      xs: "column",
+                      sm: "row",
+                    }}
                     justifyContent="space-between"
-                    alignItems="center"
+                    alignItems={{
+                      xs: "flex-start",
+                      sm: "center",
+                    }}
+                    gap={1.2}
+                    sx={{
+                      width: "100%",
+                      minWidth: 0,
+                    }}
                   >
-                    <Box>
-                      <Typography fontWeight={700}>
+                    <Box
+                      sx={{
+                        minWidth: 0,
+                        flex: 1,
+                        width: {
+                          xs: "100%",
+                          sm: "auto",
+                        },
+                      }}
+                    >
+                      <Typography
+                        fontWeight={750}
+                        color="text.primary"
+                        sx={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
                         {visitor.name}
                       </Typography>
 
                       <Typography
                         variant="body2"
                         color="text.secondary"
+                        sx={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
                       >
                         {visitor.company}
                       </Typography>
@@ -609,48 +835,72 @@ const Dashboard = () => {
                       size="small"
                       color={visitor.color}
                       label={visitor.status}
+                      sx={{
+                        flexShrink: 0,
+                        alignSelf: {
+                          xs: "flex-start",
+                          sm: "center",
+                        },
+                        fontWeight: 600,
+                      }}
                     />
                   </Stack>
-                </Paper>
+                </Box>
               ))}
             </Stack>
           </Paper>
         </Grid>
       </Grid>
 
-      {/* ================= Footer ================= */}
-      <Box
+      {/* ================= FOOTER ================= */}
+
+      <Paper
+        elevation={0}
         sx={{
-          mt: 4,
-          p: 4,
-          borderRadius: 6,
-          background: "linear-gradient(135deg,#2563EB,#1D4ED8)",
+          width: "100%",
+          minWidth: 0,
+          mt: 3,
+          p: { xs: 2, md: 3 },
+          borderRadius: 4,
+          background:
+            "linear-gradient(135deg,#2563EB,#1D4ED8)",
           color: "#fff",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
+          overflow: "hidden",
         }}
       >
-        <Box>
-          <Typography variant="h4" fontWeight={700}>
-            VisitorPro
-          </Typography>
-
-          <Typography sx={{ opacity: 0.9 }}>
-            Smart Visitor Management System
-          </Typography>
-        </Box>
-
-        <Chip
-          label="System Online"
-          color="success"
-          sx={{
-            fontWeight: 700,
-            px: 2,
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          alignItems={{
+            xs: "flex-start",
+            sm: "center",
           }}
-        />
-      </Box>
+          gap={2}
+        >
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              variant="h5"
+              fontWeight={800}
+            >
+              VisitorPro
+            </Typography>
+
+            <Typography sx={{ opacity: 0.9 }}>
+              Smart Visitor Management System
+            </Typography>
+          </Box>
+
+          <Chip
+            label="System Online"
+            sx={{
+              bgcolor: "#22C55E",
+              color: "#fff",
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          />
+        </Stack>
+      </Paper>
     </Box>
   );
 };

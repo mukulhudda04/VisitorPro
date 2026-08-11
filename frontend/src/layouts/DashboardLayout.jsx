@@ -28,6 +28,7 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
@@ -70,7 +71,7 @@ const notificationSeed = [
     id: 1,
     title: "New visitor registered",
     description: "A new visitor has been added to the system.",
-    time: "Just now",
+    createdAt: Date.now(),
     type: "visitor",
     unread: true,
     mention: false,
@@ -79,7 +80,7 @@ const notificationSeed = [
     id: 2,
     title: "Visitor checked in",
     description: "A visitor has successfully checked in.",
-    time: "10 minutes ago",
+    createdAt: Date.now() - 10 * 60 * 1000,
     type: "success",
     unread: true,
     mention: false,
@@ -88,7 +89,7 @@ const notificationSeed = [
     id: 3,
     title: "Visit requires attention",
     description: "An active visit needs your attention.",
-    time: "25 minutes ago",
+    createdAt: Date.now() - 25 * 60 * 1000,
     type: "warning",
     unread: true,
     mention: true,
@@ -102,6 +103,8 @@ const DashboardLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mobile = useMediaQuery("(max-width:900px)");
+  const muiTheme = useTheme();
+  const isDark = muiTheme.palette.mode === "dark";
 
   const user = useMemo(() => {
     try {
@@ -120,20 +123,27 @@ const DashboardLayout = () => {
   const [switchUsers, setSwitchUsers] = useState([]);
   const [switchLoading, setSwitchLoading] = useState(false);
 
-  const [notifications, setNotifications] =
-    useState(notificationSeed);
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem("visitorpro_notifications");
 
-  const [notificationTab, setNotificationTab] =
-    useState("all");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return notificationSeed;
+      }
+    }
 
-  const [notificationsEnabled, setNotificationsEnabled] =
-    useState(() => {
-      return (
-        localStorage.getItem(
-          "visitorpro_notifications_enabled"
-        ) !== "false"
-      );
-    });
+    return notificationSeed;
+  });
+
+  const [notificationTab, setNotificationTab] = useState("all");
+
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    return (
+      localStorage.getItem("visitorpro_notifications_enabled") !== "false"
+    );
+  });
 
   const [notificationSettingsOpen, setNotificationSettingsOpen] =
     useState(false);
@@ -253,6 +263,7 @@ const DashboardLayout = () => {
   const handleToggleNotifications = () => {
     setNotificationsEnabled((current) => {
       const next = !current;
+
       localStorage.setItem(
         "visitorpro_notifications_enabled",
         String(next)
@@ -269,23 +280,38 @@ const DashboardLayout = () => {
   };
 
   const markAllAsRead = () => {
-    setNotifications((current) =>
-      current.map((item) => ({
+    setNotifications((current) => {
+      const next = current.map((item) => ({
         ...item,
         unread: false,
-      }))
-    );
+      }));
+
+      localStorage.setItem(
+        "visitorpro_notifications",
+        JSON.stringify(next)
+      );
+
+      return next;
+    });
+
     toast.success("All notifications marked as read.");
   };
 
   const markNotificationAsRead = (id) => {
-    setNotifications((current) =>
-      current.map((item) =>
+    setNotifications((current) => {
+      const next = current.map((item) =>
         item.id === id
           ? { ...item, unread: false }
           : item
-      )
-    );
+      );
+
+      localStorage.setItem(
+        "visitorpro_notifications",
+        JSON.stringify(next)
+      );
+
+      return next;
+    });
   };
 
   const handleSwitchUser = async () => {
@@ -308,6 +334,7 @@ const DashboardLayout = () => {
       setSwitchUserOpen(true);
     } catch (error) {
       console.error(error);
+
       toast.error(
         error.response?.data?.message ||
           "Unable to load users."
@@ -320,9 +347,12 @@ const DashboardLayout = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     handleProfileClose();
     handleNotificationClose();
+
     navigate("/login", { replace: true });
+
     toast.success("Logged out successfully.");
   };
 
@@ -363,11 +393,11 @@ const DashboardLayout = () => {
     <Box
       sx={{
         height: "100%",
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
-       background:
-  "linear-gradient(180deg,#0F172A 0%,#111827 100%)",
-minHeight: "100vh",
+        background:
+          "linear-gradient(180deg,#0F172A 0%,#111827 100%)",
       }}
     >
       <Box sx={{ flexGrow: 1 }}>
@@ -388,13 +418,13 @@ minHeight: "100vh",
 
           <Box>
             <Typography
-  variant="h5"
-  fontWeight={900}
-  color="#FFFFFF"
-  lineHeight={1}
->
-  VisitorPro
-</Typography>
+              variant="h5"
+              fontWeight={900}
+              color="#FFFFFF"
+              lineHeight={1}
+            >
+              VisitorPro
+            </Typography>
 
             <Typography
               variant="caption"
@@ -435,6 +465,7 @@ minHeight: "100vh",
               onClick={() => navigateTo(item.path)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
+
               <ListItemText
                 primary={item.label}
                 primaryTypographyProps={{
@@ -499,8 +530,10 @@ minHeight: "100vh",
     <Box
       sx={{
         display: "flex",
+        width: "100%",
         minHeight: "100vh",
-        bgcolor: "#F4F7FC",
+        overflowX: "hidden",
+        bgcolor: "background.default",
       }}
     >
       <CssBaseline />
@@ -546,14 +579,17 @@ minHeight: "100vh",
         sx={{
           zIndex: (theme) =>
             theme.zIndex.drawer + 1,
-          ml: mobile ? 0 : `${drawerWidth}px`,
+          left: mobile ? 0 : `${drawerWidth}px`,
           width: mobile
             ? "100%"
             : `calc(100% - ${drawerWidth}px)`,
-          bgcolor: "rgba(255,255,255,.92)",
-          color: "#0F172A",
+          bgcolor: isDark
+            ? "rgba(15,23,42,.94)"
+            : "rgba(255,255,255,.92)",
+          color: "text.primary",
           backdropFilter: "blur(14px)",
-          borderBottom: "1px solid #E2E8F0",
+          borderBottom: "1px solid",
+          borderColor: "divider",
         }}
       >
         <Toolbar
@@ -561,6 +597,7 @@ minHeight: "100vh",
             minHeight: "72px !important",
             px: { xs: 1.5, sm: 2.5 },
             gap: 1,
+            minWidth: 0,
           }}
         >
           {mobile && (
@@ -570,7 +607,7 @@ minHeight: "100vh",
               }
               sx={{
                 mr: 0.5,
-                color: "#0F172A",
+                color: "text.primary",
               }}
             >
               <MenuRoundedIcon />
@@ -581,6 +618,7 @@ minHeight: "100vh",
             sx={{
               flexGrow: 1,
               minWidth: 0,
+              overflow: "hidden",
             }}
           >
             <Typography
@@ -600,6 +638,7 @@ minHeight: "100vh",
                   sm: "block",
                 },
               }}
+              noWrap
             >
               Smart Visitor Management System
             </Typography>
@@ -609,9 +648,7 @@ minHeight: "100vh",
             <span>
               <IconButton
                 onClick={() => navigate(-1)}
-                disabled={
-                  window.history.length <= 1
-                }
+                disabled={window.history.length <= 1}
                 size="small"
               >
                 <ArrowBackRoundedIcon />
@@ -623,9 +660,7 @@ minHeight: "100vh",
             <span>
               <IconButton
                 onClick={() => navigate(1)}
-                disabled={
-                  window.history.length <= 1
-                }
+                disabled={window.history.length <= 1}
                 size="small"
               >
                 <ArrowForwardRoundedIcon />
@@ -646,9 +681,7 @@ minHeight: "100vh",
                   event.currentTarget
                 )
               }
-              sx={{
-                ml: 0.5,
-              }}
+              sx={{ ml: 0.5 }}
             >
               <Badge
                 badgeContent={
@@ -681,8 +714,11 @@ minHeight: "100vh",
               py: 0.5,
               ml: 0.5,
               transition: ".2s",
+              minWidth: 0,
               "&:hover": {
-                bgcolor: "#F1F5F9",
+                bgcolor: isDark
+                  ? "rgba(255,255,255,.06)"
+                  : "#F1F5F9",
               },
             }}
           >
@@ -692,6 +728,7 @@ minHeight: "100vh",
                 width: 42,
                 height: 42,
                 fontWeight: 800,
+                flexShrink: 0,
               }}
             >
               {user?.fullName
@@ -702,6 +739,7 @@ minHeight: "100vh",
             <Box
               sx={{
                 mx: 1.2,
+                minWidth: 0,
                 display: {
                   xs: "none",
                   sm: "block",
@@ -711,6 +749,7 @@ minHeight: "100vh",
               <Typography
                 fontWeight={750}
                 lineHeight={1.2}
+                noWrap
               >
                 {user?.fullName || "User"}
               </Typography>
@@ -718,6 +757,7 @@ minHeight: "100vh",
               <Typography
                 variant="body2"
                 color="text.secondary"
+                noWrap
               >
                 {getRoleName(user?.roleId)}
               </Typography>
@@ -730,6 +770,7 @@ minHeight: "100vh",
                   sm: "block",
                 },
                 color: "#64748B",
+                flexShrink: 0,
               }}
             />
           </Box>
@@ -757,24 +798,16 @@ minHeight: "100vh",
               minWidth: 245,
               borderRadius: 3,
               p: 1,
-              border: "1px solid #E2E8F0",
+              border: "1px solid",
+              borderColor: "divider",
               boxShadow:
                 "0 20px 50px rgba(15,23,42,.15)",
             },
           },
         }}
       >
-        <Box
-          sx={{
-            px: 1.5,
-            py: 1.3,
-            mb: 0.5,
-          }}
-        >
-          <Typography
-            fontWeight={800}
-            noWrap
-          >
+        <Box sx={{ px: 1.5, py: 1.3, mb: 0.5 }}>
+          <Typography fontWeight={800} noWrap>
             {user?.fullName || "User"}
           </Typography>
 
@@ -872,9 +905,12 @@ minHeight: "100vh",
               maxWidth: "calc(100vw - 20px)",
               borderRadius: 3.5,
               overflow: "hidden",
-              border: "1px solid #E2E8F0",
-              boxShadow:
-                "0 24px 70px rgba(15,23,42,.20)",
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.paper",
+              boxShadow: isDark
+                ? "0 24px 70px rgba(0,0,0,.45)"
+                : "0 24px 70px rgba(15,23,42,.20)",
             },
           },
         }}
@@ -883,9 +919,11 @@ minHeight: "100vh",
           sx={{
             px: 2.5,
             py: 2.1,
-            background:
-              "linear-gradient(135deg,#FFFFFF,#EFF6FF)",
-            borderBottom: "1px solid #E2E8F0",
+            background: isDark
+              ? "linear-gradient(135deg,#172554,#1E293B)"
+              : "linear-gradient(135deg,#FFFFFF,#EFF6FF)",
+            borderBottom: "1px solid",
+            borderColor: "divider",
           }}
         >
           <Stack
@@ -894,11 +932,12 @@ minHeight: "100vh",
             alignItems="flex-start"
             gap={2}
           >
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Stack
                 direction="row"
                 alignItems="center"
                 gap={1}
+                flexWrap="wrap"
               >
                 <Typography
                   fontWeight={850}
@@ -955,11 +994,17 @@ minHeight: "100vh",
             direction="row"
             alignItems="center"
             justifyContent="space-between"
-            sx={{ mt: 2 }}
+            sx={{
+              mt: 2,
+              gap: 1,
+              flexWrap: "wrap",
+            }}
           >
             <Stack
               direction="row"
               spacing={0.6}
+              flexWrap="wrap"
+              useFlexGap
             >
               {[
                 ["all", "All"],
@@ -1000,26 +1045,26 @@ minHeight: "100vh",
             </Stack>
 
             <Button
-  size="small"
-  startIcon={<DoneAllRoundedIcon />}
-  onClick={markAllAsRead}
-  disabled={unreadCount === 0}
-  sx={{
-    textTransform: "none",
-    fontWeight: 800,
-    color:
-      unreadCount > 0
-        ? "#2563EB"
-        : "#94A3B8",
-    minWidth: "auto",
-    whiteSpace: "nowrap",
-    "&.Mui-disabled": {
-      color: "#94A3B8",
-    },
-  }}
->
-  Mark all as read
-</Button>
+              size="small"
+              startIcon={<DoneAllRoundedIcon />}
+              onClick={markAllAsRead}
+              disabled={unreadCount === 0}
+              sx={{
+                textTransform: "none",
+                fontWeight: 800,
+                color:
+                  unreadCount > 0
+                    ? "#2563EB"
+                    : "#94A3B8",
+                minWidth: "auto",
+                whiteSpace: "nowrap",
+                "&.Mui-disabled": {
+                  color: "#94A3B8",
+                },
+              }}
+            >
+              Mark all as read
+            </Button>
           </Stack>
         </Box>
 
@@ -1038,7 +1083,7 @@ minHeight: "100vh",
                 mx: "auto",
                 mb: 1.5,
                 borderRadius: "50%",
-                bgcolor: "#F1F5F9",
+                bgcolor: "action.hover",
                 display: "grid",
                 placeItems: "center",
               }}
@@ -1051,10 +1096,7 @@ minHeight: "100vh",
               />
             </Box>
 
-            <Typography
-              fontWeight={800}
-              fontSize={16}
-            >
+            <Typography fontWeight={800} fontSize={16}>
               Notifications are turned off
             </Typography>
 
@@ -1097,7 +1139,9 @@ minHeight: "100vh",
                 mx: "auto",
                 mb: 1.5,
                 borderRadius: "50%",
-                bgcolor: "#ECFDF5",
+                bgcolor: isDark
+                  ? "rgba(34,197,94,.12)"
+                  : "#ECFDF5",
                 display: "grid",
                 placeItems: "center",
               }}
@@ -1110,10 +1154,7 @@ minHeight: "100vh",
               />
             </Box>
 
-            <Typography
-              fontWeight={800}
-              fontSize={16}
-            >
+            <Typography fontWeight={800} fontSize={16}>
               {notificationTab === "mentions"
                 ? "No mentions yet"
                 : "You're all caught up"}
@@ -1137,134 +1178,144 @@ minHeight: "100vh",
               py: 0.5,
             }}
           >
-            {visibleNotifications.map(
-              (notification) => {
-                const iconStyle =
-                  renderNotificationStyles(
-                    notification.type
-                  );
+            {visibleNotifications.map((notification) => {
+              const iconStyle =
+                renderNotificationStyles(
+                  notification.type
+                );
 
-                return (
+              return (
+                <Box
+                  key={notification.id}
+                  sx={{
+                    mx: 1.2,
+                    my: 0.7,
+                    px: 1.4,
+                    py: 1.5,
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 1.3,
+                    borderRadius: 2.5,
+                    bgcolor: notification.unread
+                      ? isDark
+                        ? "rgba(37,99,235,.12)"
+                        : "#F8FBFF"
+                      : "background.paper",
+                    border: "1px solid",
+                    borderColor: notification.unread
+                      ? isDark
+                        ? "rgba(96,165,250,.28)"
+                        : "#DBEAFE"
+                      : "divider",
+                    transition: ".2s",
+                    "&:hover": {
+                      bgcolor: isDark
+                        ? "rgba(59,130,246,.10)"
+                        : "#F1F7FF",
+                    },
+                  }}
+                >
                   <Box
-                    key={notification.id}
                     sx={{
-                      mx: 1.2,
-                      my: 0.7,
-                      px: 1.4,
-                      py: 1.5,
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: 1.3,
-                      borderRadius: 2.5,
+                      width: 7,
+                      height: 7,
+                      mt: 1.1,
+                      borderRadius: "50%",
                       bgcolor: notification.unread
-                        ? "#F8FBFF"
-                        : "#FFFFFF",
-                      border: "1px solid",
-                      borderColor: notification.unread
-                        ? "#DBEAFE"
-                        : "#F1F5F9",
-                      transition: ".2s",
-                      "&:hover": {
-                        bgcolor: "#F1F7FF",
-                      },
+                        ? "#2563EB"
+                        : "transparent",
+                      flexShrink: 0,
+                    }}
+                  />
+
+                  <Avatar
+                    sx={{
+                      width: 46,
+                      height: 46,
+                      borderRadius: 2.5,
+                      flexShrink: 0,
+                      ...iconStyle,
                     }}
                   >
-                    <Box
-                      sx={{
-                        width: 7,
-                        height: 7,
-                        mt: 1.1,
-                        borderRadius: "50%",
-                        bgcolor: notification.unread
-                          ? "#2563EB"
-                          : "transparent",
-                        flexShrink: 0,
-                      }}
-                    />
-
-                    <Avatar
-                      sx={{
-                        width: 46,
-                        height: 46,
-                        borderRadius: 2.5,
-                        flexShrink: 0,
-                        ...iconStyle,
-                      }}
-                    >
-                      {renderNotificationIcon(
-                        notification.type
-                      )}
-                    </Avatar>
-
-                    <Box
-                      sx={{
-                        flexGrow: 1,
-                        minWidth: 0,
-                      }}
-                    >
-                      <Typography
-                        fontWeight={800}
-                        fontSize={14.5}
-                      >
-                        {notification.title}
-                      </Typography>
-
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{
-                          mt: 0.35,
-                          lineHeight: 1.45,
-                        }}
-                      >
-                        {notification.description}
-                      </Typography>
-
-                      <Stack
-                        direction="row"
-                        alignItems="center"
-                        gap={0.5}
-                        sx={{ mt: 0.7 }}
-                      >
-                        <AccessTimeRoundedIcon
-                          sx={{
-                            fontSize: 15,
-                            color: "#94A3B8",
-                          }}
-                        />
-
-                        <Typography
-                          variant="caption"
-                          color="#64748B"
-                        >
-                          {notification.time}
-                        </Typography>
-                      </Stack>
-                    </Box>
-
-                    {notification.unread && (
-                      <Button
-                        size="small"
-                        onClick={() =>
-                          markNotificationAsRead(
-                            notification.id
-                          )
-                        }
-                        sx={{
-                          minWidth: "auto",
-                          textTransform: "none",
-                          fontSize: 11,
-                          fontWeight: 750,
-                          color: "#2563EB",
-                        }}
-                      >
-                        Read
-                      </Button>
+                    {renderNotificationIcon(
+                      notification.type
                     )}
+                  </Avatar>
+
+                  <Box
+                    sx={{
+                      flexGrow: 1,
+                      minWidth: 0,
+                    }}
+                  >
+                    <Typography
+                      fontWeight={800}
+                      fontSize={14.5}
+                    >
+                      {notification.title}
+                    </Typography>
+
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mt: 0.35,
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {notification.description}
+                    </Typography>
+
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={0.5}
+                      sx={{ mt: 0.7 }}
+                    >
+                      <AccessTimeRoundedIcon
+                        sx={{
+                          fontSize: 15,
+                          color: "#94A3B8",
+                        }}
+                      />
+
+                      <Typography
+                        variant="caption"
+                        color="#64748B"
+                      >
+                        {new Date(
+                          notification.createdAt
+                        ).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </Typography>
+                    </Stack>
                   </Box>
-                );
-              }
-            )}
+
+                  {notification.unread && (
+                    <Button
+                      size="small"
+                      onClick={() =>
+                        markNotificationAsRead(
+                          notification.id
+                        )
+                      }
+                      sx={{
+                        minWidth: "auto",
+                        textTransform: "none",
+                        fontSize: 11,
+                        fontWeight: 750,
+                        color: "#2563EB",
+                        flexShrink: 0,
+                      }}
+                    >
+                      Read
+                    </Button>
+                  )}
+                </Box>
+              );
+            })}
           </Box>
         )}
 
@@ -1272,8 +1323,9 @@ minHeight: "100vh",
           sx={{
             px: 1.8,
             py: 1.4,
-            borderTop: "1px solid #E2E8F0",
-            bgcolor: "#F8FAFC",
+            borderTop: "1px solid",
+            borderColor: "divider",
+            bgcolor: "background.default",
           }}
         >
           <Stack
@@ -1281,6 +1333,7 @@ minHeight: "100vh",
             justifyContent="space-between"
             alignItems="center"
             gap={1}
+            flexWrap="wrap"
           >
             <Button
               size="small"
@@ -1328,8 +1381,11 @@ minHeight: "100vh",
           sx: {
             borderRadius: 4,
             p: 1,
-            boxShadow:
-              "0 24px 70px rgba(15,23,42,.20)",
+            bgcolor: "background.paper",
+            color: "text.primary",
+            boxShadow: isDark
+              ? "0 24px 70px rgba(0,0,0,.45)"
+              : "0 24px 70px rgba(15,23,42,.20)",
           },
         }}
       >
@@ -1384,11 +1440,16 @@ minHeight: "100vh",
                   mb: 1,
                   borderRadius: 2.5,
                   cursor: "pointer",
-                  border: "1px solid #E2E8F0",
+                  border: "1px solid",
+                  borderColor: "divider",
                   transition: ".2s",
                   "&:hover": {
-                    bgcolor: "#F3F7FF",
-                    borderColor: "#BFDBFE",
+                    bgcolor: isDark
+                      ? "rgba(59,130,246,.10)"
+                      : "#F3F7FF",
+                    borderColor: isDark
+                      ? "rgba(96,165,250,.35)"
+                      : "#BFDBFE",
                     transform: "translateY(-1px)",
                   },
                 }}
@@ -1405,10 +1466,7 @@ minHeight: "100vh",
                 </Avatar>
 
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography
-                    fontWeight={750}
-                    noWrap
-                  >
+                  <Typography fontWeight={750} noWrap>
                     {switchUser.FullName}
                   </Typography>
 
@@ -1448,12 +1506,15 @@ minHeight: "100vh",
           sx: {
             borderRadius: 4,
             p: 1,
+            bgcolor: "background.paper",
+            color: "text.primary",
           },
         }}
       >
         <DialogTitle
           sx={{
             fontWeight: 850,
+            color: "text.primary",
           }}
         >
           Notification Settings
@@ -1464,8 +1525,9 @@ minHeight: "100vh",
             sx={{
               p: 2,
               borderRadius: 3,
-              border: "1px solid #E2E8F0",
-              bgcolor: "#F8FAFC",
+              border: "1px solid",
+              borderColor: "divider",
+              bgcolor: "background.default",
             }}
           >
             <Stack
@@ -1474,7 +1536,7 @@ minHeight: "100vh",
               justifyContent="space-between"
               gap={2}
             >
-              <Box>
+              <Box sx={{ minWidth: 0 }}>
                 <Stack
                   direction="row"
                   alignItems="center"
@@ -1524,7 +1586,12 @@ minHeight: "100vh",
       <Box
         component="main"
         sx={{
-          flexGrow: 1,
+          flex: "1 1 auto",
+          minWidth: 0,
+          width: "100%",
+          maxWidth: "100%",
+          boxSizing: "border-box",
+          overflowX: "hidden",
           mt: "72px",
           p: {
             xs: 1.5,
@@ -1532,14 +1599,21 @@ minHeight: "100vh",
             md: 3,
           },
           minHeight: "100vh",
-          width: mobile
-            ? "100%"
-            : `calc(100% - ${drawerWidth}px)`,
-          background:
-            "linear-gradient(180deg,#F8FAFC 0%,#EEF3FB 100%)",
+          background: isDark
+            ? "linear-gradient(180deg,#0F172A 0%,#111827 100%)"
+            : "linear-gradient(180deg,#F8FAFC 0%,#EEF3FB 100%)",
         }}
       >
-        <Outlet />
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            boxSizing: "border-box",
+          }}
+        >
+          <Outlet />
+        </Box>
       </Box>
     </Box>
   );

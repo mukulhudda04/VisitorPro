@@ -26,6 +26,7 @@ import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
 
 import toast from "react-hot-toast";
 import api from "../../config/api";
@@ -45,7 +46,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (!email.trim() || !password) {
       toast.error("Please enter email and password.");
       return;
     }
@@ -54,7 +55,7 @@ const Login = () => {
       setLoading(true);
 
       const response = await api.post("/auth/login", {
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -96,208 +97,192 @@ const Login = () => {
       sx={{
         minHeight: "100vh",
         width: "100%",
+        position: "relative",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        position: "relative",
         overflow: "hidden",
+        px: { xs: 1.5, sm: 3 },
+        py: { xs: 2, sm: 4 },
         background:
-          "linear-gradient(135deg, #020617 0%, #0F1B3D 45%, #1D4ED8 100%)",
-        px: {
-          xs: 1.5,
-          sm: 3,
-        },
-        py: {
-          xs: 2,
-          sm: 4,
-        },
+          "radial-gradient(circle at 10% 10%, rgba(37,99,235,.20), transparent 28%), radial-gradient(circle at 90% 90%, rgba(59,130,246,.18), transparent 30%), linear-gradient(135deg,#020617 0%,#0F172A 45%,#172554 100%)",
       }}
     >
-      {/* ================= BACKGROUND GLOW ================= */}
+      {/* Background decoration */}
 
       <Box
         sx={{
           position: "absolute",
-          width: {
-            xs: 280,
-            md: 550,
-          },
-          height: {
-            xs: 280,
-            md: 550,
-          },
+          width: { xs: 260, md: 520 },
+          height: { xs: 260, md: 520 },
           borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(59,130,246,.28) 0%, rgba(59,130,246,0) 70%)",
-          top: {
-            xs: -130,
-            md: -240,
-          },
-          right: {
-            xs: -100,
-            md: -160,
-          },
+          border: "1px solid rgba(147,197,253,.08)",
+          top: { xs: -160, md: -250 },
+          right: { xs: -120, md: -180 },
+          pointerEvents: "none",
         }}
       />
 
       <Box
         sx={{
           position: "absolute",
-          width: 400,
-          height: 400,
+          width: { xs: 220, md: 420 },
+          height: { xs: 220, md: 420 },
           borderRadius: "50%",
-          background:
-            "radial-gradient(circle, rgba(37,99,235,.18) 0%, rgba(37,99,235,0) 70%)",
-          bottom: -220,
-          left: -160,
+          border: "1px solid rgba(147,197,253,.06)",
+          bottom: { xs: -130, md: -220 },
+          left: { xs: -120, md: -180 },
+          pointerEvents: "none",
         }}
       />
-
-      {/* ================= MAIN CONTAINER ================= */}
 
       <Container
         maxWidth="lg"
         sx={{
           position: "relative",
           zIndex: 2,
+          px: { xs: 0, sm: 2 },
         }}
       >
         <Card
           elevation={0}
           sx={{
-            maxWidth: 1120,
+            width: "100%",
+            maxWidth: 1180,
             mx: "auto",
             overflow: "hidden",
             borderRadius: {
               xs: 3,
+              sm: 4,
               md: 5,
             },
-            background: "#FFFFFF",
+            backgroundColor: "#fff",
             boxShadow:
-              "0 35px 100px rgba(0,0,0,.38)",
+              "0 35px 100px rgba(0,0,0,.45)",
           }}
         >
           <Box
             sx={{
               display: "flex",
-              minHeight: {
-                xs: "auto",
-                md: 650,
-              },
               flexDirection: {
                 xs: "column",
                 md: "row",
               },
+              minHeight: {
+                md: 680,
+              },
             }}
           >
-            {/* ================================================= */}
-            {/* LEFT SIDE */}
-            {/* ================================================= */}
+            {/* =====================================================
+                LEFT BRANDING PANEL
+            ===================================================== */}
 
             <Box
               sx={{
                 width: {
                   xs: "100%",
-                  md: "52%",
+                  md: "53%",
                 },
                 position: "relative",
                 overflow: "hidden",
+                color: "#fff",
                 p: {
                   xs: 3,
-                  sm: 5,
+                  sm: 4,
                   md: 6,
                 },
-                color: "#FFFFFF",
                 background:
-                  "linear-gradient(145deg, #0B1225 0%, #172554 58%, #2563EB 100%)",
+                  "linear-gradient(145deg,#020617 0%,#0F1B3D 48%,#1D4ED8 100%)",
               }}
             >
-              {/* Decorative rings */}
+              {/* Decorative circles */}
 
               <Box
                 sx={{
                   position: "absolute",
-                  width: 310,
-                  height: 310,
+                  width: 430,
+                  height: 430,
                   borderRadius: "50%",
                   border:
-                    "1px solid rgba(147,197,253,.12)",
-                  top: -145,
-                  right: -100,
+                    "1px solid rgba(147,197,253,.10)",
+                  top: -230,
+                  right: -170,
+                  pointerEvents: "none",
                 }}
               />
 
               <Box
                 sx={{
                   position: "absolute",
-                  width: 210,
-                  height: 210,
+                  width: 280,
+                  height: 280,
                   borderRadius: "50%",
                   border:
-                    "1px solid rgba(147,197,253,.10)",
-                  bottom: -110,
-                  left: -100,
+                    "1px solid rgba(147,197,253,.08)",
+                  bottom: -170,
+                  left: -140,
+                  pointerEvents: "none",
                 }}
               />
 
               {/* Logo */}
 
-              <Box
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1.5}
                 sx={{
                   position: "relative",
-                  zIndex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
+                  zIndex: 2,
                 }}
               >
                 <Avatar
                   sx={{
                     width: 54,
                     height: 54,
-                    bgcolor: "#3B82F6",
+                    bgcolor: "#2563EB",
+                    border:
+                      "1px solid rgba(147,197,253,.35)",
                     boxShadow:
-                      "0 12px 30px rgba(59,130,246,.35)",
+                      "0 12px 35px rgba(37,99,235,.40)",
                   }}
                 >
-                  <ShieldIcon
-                    sx={{
-                      fontSize: 32,
-                    }}
-                  />
+                  <ShieldIcon sx={{ fontSize: 31 }} />
                 </Avatar>
 
                 <Box>
                   <Typography
-                    fontSize={24}
-                    fontWeight={800}
+                    fontSize={{ xs: 23, sm: 25 }}
+                    fontWeight={850}
                     lineHeight={1}
-                    letterSpacing="-.5px"
+                    letterSpacing="-0.6px"
                   >
                     VisitorPro
                   </Typography>
 
                   <Typography
-                    fontSize={11}
-                    color="#93C5FD"
                     sx={{
                       mt: 0.5,
-                      letterSpacing: ".7px",
+                      fontSize: 10,
+                      letterSpacing: 1.2,
+                      color: "#93C5FD",
+                      fontWeight: 700,
                     }}
                   >
-                    VISITOR MANAGEMENT
+                    VISITOR MANAGEMENT SYSTEM
                   </Typography>
                 </Box>
-              </Box>
+              </Stack>
 
-              {/* Main heading */}
+              {/* Main text */}
 
               <Box
                 sx={{
                   position: "relative",
-                  zIndex: 1,
+                  zIndex: 2,
                   mt: {
                     xs: 4,
+                    sm: 5,
                     md: 7,
                   },
                 }}
@@ -306,13 +291,12 @@ const Login = () => {
                   sx={{
                     fontSize: {
                       xs: 30,
-                      sm: 36,
-                      md: 44,
+                      sm: 38,
+                      md: 46,
                     },
-                    fontWeight: 800,
+                    fontWeight: 850,
                     lineHeight: 1.08,
-                    letterSpacing: "-1.5px",
-                    maxWidth: 500,
+                    letterSpacing: "-1.8px",
                   }}
                 >
                   Smarter visitor
@@ -330,10 +314,13 @@ const Login = () => {
                 <Typography
                   sx={{
                     mt: 2,
+                    maxWidth: 520,
                     color: "#CBD5E1",
                     lineHeight: 1.75,
-                    maxWidth: 500,
-                    fontSize: 15,
+                    fontSize: {
+                      xs: 14,
+                      sm: 15,
+                    },
                   }}
                 >
                   Manage visitors, monitor active
@@ -343,105 +330,109 @@ const Login = () => {
                 </Typography>
               </Box>
 
-              {/* ================= DASHBOARD VISUAL ================= */}
+              {/* Security visual */}
 
               <Box
                 sx={{
                   position: "relative",
-                  zIndex: 1,
-                  mt: {
-                    xs: 4,
-                    md: 5,
-                  },
+                  zIndex: 2,
                   height: {
                     xs: 190,
-                    md: 220,
+                    sm: 220,
+                    md: 245,
+                  },
+                  mt: {
+                    xs: 3,
+                    md: 4,
                   },
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {/* Main security circle */}
-
                 <Box
                   sx={{
                     width: {
-                      xs: 150,
-                      md: 190,
+                      xs: 145,
+                      sm: 175,
+                      md: 195,
                     },
                     height: {
-                      xs: 150,
-                      md: 190,
+                      xs: 145,
+                      sm: 175,
+                      md: 195,
                     },
                     borderRadius: "50%",
-                    border:
-                      "1px solid rgba(147,197,253,.28)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     position: "relative",
+                    border:
+                      "1px solid rgba(147,197,253,.28)",
                     background:
-                      "radial-gradient(circle, rgba(59,130,246,.18), rgba(15,23,42,.05))",
+                      "radial-gradient(circle,rgba(59,130,246,.20),rgba(15,23,42,.04))",
                     boxShadow:
-                      "0 0 50px rgba(59,130,246,.12)",
+                      "0 0 65px rgba(59,130,246,.14)",
                   }}
                 >
                   <Box
                     sx={{
                       width: {
-                        xs: 100,
-                        md: 125,
+                        xs: 95,
+                        sm: 115,
+                        md: 130,
                       },
                       height: {
-                        xs: 100,
-                        md: 125,
+                        xs: 95,
+                        sm: 115,
+                        md: 130,
                       },
                       borderRadius: "50%",
-                      background:
-                        "rgba(59,130,246,.15)",
-                      border:
-                        "1px solid rgba(147,197,253,.25)",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      background:
+                        "rgba(59,130,246,.14)",
+                      border:
+                        "1px solid rgba(147,197,253,.25)",
                     }}
                   >
                     <ShieldIcon
                       sx={{
                         fontSize: {
-                          xs: 50,
-                          md: 65,
+                          xs: 48,
+                          sm: 57,
+                          md: 68,
                         },
                         color: "#60A5FA",
                       }}
                     />
                   </Box>
 
-                  {/* Active Visitors card */}
+                  {/* Active visitor floating card */}
 
                   <Paper
                     elevation={0}
                     sx={{
                       position: "absolute",
                       top: {
-                        xs: -8,
-                        md: 0,
+                        xs: -4,
+                        sm: 0,
                       },
                       right: {
-                        xs: -75,
-                        md: -105,
+                        xs: -60,
+                        sm: -85,
+                        md: -110,
                       },
                       px: 1.5,
                       py: 1,
                       borderRadius: 2.5,
+                      color: "#fff",
                       background:
-                        "rgba(255,255,255,.10)",
-                      backdropFilter:
-                        "blur(14px)",
+                        "rgba(255,255,255,.09)",
+                      backdropFilter: "blur(14px)",
                       border:
-                        "1px solid rgba(255,255,255,.16)",
-                      color: "#FFFFFF",
+                        "1px solid rgba(255,255,255,.15)",
                     }}
                   >
                     <Stack
@@ -458,14 +449,14 @@ const Login = () => {
 
                       <Box>
                         <Typography
-                          fontSize={10}
+                          fontSize={9.5}
                           color="#CBD5E1"
                         >
                           Active Visitors
                         </Typography>
 
                         <Typography
-                          fontWeight={800}
+                          fontWeight={850}
                           fontSize={15}
                         >
                           24
@@ -474,30 +465,30 @@ const Login = () => {
                     </Stack>
                   </Paper>
 
-                  {/* Security card */}
+                  {/* Secure card */}
 
                   <Paper
                     elevation={0}
                     sx={{
                       position: "absolute",
                       bottom: {
-                        xs: -5,
-                        md: 0,
+                        xs: -3,
+                        sm: 0,
                       },
                       left: {
-                        xs: -70,
-                        md: -105,
+                        xs: -55,
+                        sm: -80,
+                        md: -110,
                       },
                       px: 1.5,
                       py: 1,
                       borderRadius: 2.5,
+                      color: "#fff",
                       background:
-                        "rgba(255,255,255,.10)",
-                      backdropFilter:
-                        "blur(14px)",
+                        "rgba(255,255,255,.09)",
+                      backdropFilter: "blur(14px)",
                       border:
-                        "1px solid rgba(255,255,255,.16)",
-                      color: "#FFFFFF",
+                        "1px solid rgba(255,255,255,.15)",
                     }}
                   >
                     <Stack
@@ -507,14 +498,14 @@ const Login = () => {
                     >
                       <VerifiedUserOutlinedIcon
                         sx={{
-                          fontSize: 20,
+                          fontSize: 19,
                           color: "#4ADE80",
                         }}
                       />
 
                       <Typography
-                        fontSize={12}
-                        fontWeight={600}
+                        fontSize={11.5}
+                        fontWeight={650}
                       >
                         Secure & Protected
                       </Typography>
@@ -523,25 +514,23 @@ const Login = () => {
                 </Box>
               </Box>
 
-              {/* Features */}
+              {/* Feature badges */}
 
               <Stack
                 direction="row"
-                spacing={3}
+                spacing={2.5}
+                flexWrap="wrap"
+                useFlexGap
                 sx={{
                   position: "relative",
-                  zIndex: 1,
-                  mt: 2,
-                  flexWrap: "wrap",
-                  rowGap: 1,
+                  zIndex: 2,
+                  mt: 1,
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.8,
-                  }}
+                <Stack
+                  direction="row"
+                  spacing={0.7}
+                  alignItems="center"
                 >
                   <SecurityOutlinedIcon
                     sx={{
@@ -556,14 +545,12 @@ const Login = () => {
                   >
                     Secure Access
                   </Typography>
-                </Box>
+                </Stack>
 
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.8,
-                  }}
+                <Stack
+                  direction="row"
+                  spacing={0.7}
+                  alignItems="center"
                 >
                   <VerifiedUserOutlinedIcon
                     sx={{
@@ -578,19 +565,19 @@ const Login = () => {
                   >
                     Role Based
                   </Typography>
-                </Box>
+                </Stack>
               </Stack>
             </Box>
 
-            {/* ================================================= */}
-            {/* RIGHT LOGIN SIDE */}
-            {/* ================================================= */}
+            {/* =====================================================
+                RIGHT LOGIN PANEL
+            ===================================================== */}
 
             <Box
               sx={{
                 width: {
                   xs: "100%",
-                  md: "48%",
+                  md: "47%",
                 },
                 display: "flex",
                 alignItems: "center",
@@ -600,35 +587,60 @@ const Login = () => {
                   sm: 5,
                   md: 6,
                 },
+                bgcolor: "#fff",
               }}
             >
               <CardContent
                 sx={{
                   width: "100%",
-                  maxWidth: 430,
+                  maxWidth: 425,
                   p: "0 !important",
                 }}
               >
-                {/* Header */}
+                {/* Login heading */}
 
-                <Typography
-                  sx={{
-                    fontSize: {
-                      xs: 30,
-                      sm: 34,
-                    },
-                    fontWeight: 800,
-                    color: "#0F172A",
-                    letterSpacing: "-1px",
-                  }}
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1.5}
+                  mb={1.5}
                 >
-                  Welcome back 👋
-                </Typography>
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 2.5,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      bgcolor: "#EFF6FF",
+                      color: "#2563EB",
+                    }}
+                  >
+                    <LockRoundedIcon />
+                  </Box>
+
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontSize: {
+                          xs: 27,
+                          sm: 31,
+                        },
+                        fontWeight: 850,
+                        color: "#0F172A",
+                        letterSpacing: "-1px",
+                        lineHeight: 1.1,
+                      }}
+                    >
+                      Welcome back
+                    </Typography>
+                  </Box>
+                </Stack>
 
                 <Typography
-                  color="text.secondary"
+                  color="#64748B"
                   sx={{
-                    mt: 1,
                     mb: 3.5,
                     fontSize: 14,
                     lineHeight: 1.7,
@@ -638,7 +650,7 @@ const Login = () => {
                   VisitorPro dashboard.
                 </Typography>
 
-                {/* Switch User message */}
+                {/* Switch user */}
 
                 {location.state?.switchUser && (
                   <Alert
@@ -646,7 +658,7 @@ const Login = () => {
                     sx={{
                       mb: 2.5,
                       borderRadius: 2.5,
-                      fontSize: 13,
+                      alignItems: "center",
                     }}
                   >
                     Sign in to switch to this
@@ -658,6 +670,7 @@ const Login = () => {
 
                 <TextField
                   fullWidth
+                  required
                   label="Email address"
                   type="email"
                   value={email}
@@ -665,17 +678,20 @@ const Login = () => {
                     setEmail(e.target.value)
                   }
                   autoComplete="email"
+                  placeholder="you@example.com"
                   sx={{
                     mb: 2,
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 2.5,
                       backgroundColor: "#F8FAFC",
-                      transition: ".2s",
+                      transition: "all .2s ease",
                       "&:hover": {
                         backgroundColor: "#F1F5F9",
                       },
                       "&.Mui-focused": {
-                        backgroundColor: "#FFFFFF",
+                        backgroundColor: "#fff",
+                        boxShadow:
+                          "0 0 0 3px rgba(37,99,235,.10)",
                       },
                     },
                   }}
@@ -685,6 +701,7 @@ const Login = () => {
 
                 <TextField
                   fullWidth
+                  required
                   label="Password"
                   type={
                     showPassword
@@ -697,55 +714,53 @@ const Login = () => {
                   }
                   onKeyDown={handleKeyDown}
                   autoComplete="current-password"
+                  placeholder="Enter your password"
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: 2.5,
                       backgroundColor: "#F8FAFC",
-                      transition: ".2s",
+                      transition: "all .2s ease",
                       "&:hover": {
                         backgroundColor: "#F1F5F9",
                       },
                       "&.Mui-focused": {
-                        backgroundColor: "#FFFFFF",
+                        backgroundColor: "#fff",
+                        boxShadow:
+                          "0 0 0 3px rgba(37,99,235,.10)",
                       },
                     },
                   }}
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            type="button"
-                            edge="end"
-                            onClick={() =>
-                              setShowPassword(
-                                (prev) => !prev
-                              )
-                            }
-                            aria-label={
-                              showPassword
-                                ? "Hide password"
-                                : "Show password"
-                            }
-                            sx={{
-                              mr: 0.5,
-                              color: "#64748B",
-                              "&:hover": {
-                                color: "#2563EB",
-                                backgroundColor:
-                                  "#EFF6FF",
-                              },
-                            }}
-                          >
-                            {showPassword ? (
-                              <VisibilityOff />
-                            ) : (
-                              <Visibility />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          edge="end"
+                          onClick={() =>
+                            setShowPassword(
+                              (prev) => !prev
+                            )
+                          }
+                          aria-label={
+                            showPassword
+                              ? "Hide password"
+                              : "Show password"
+                          }
+                          sx={{
+                            color: "#64748B",
+                            "&:hover": {
+                              color: "#2563EB",
+                              bgcolor: "#EFF6FF",
+                            },
+                          }}
+                        >
+                          {showPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <Visibility />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
                 />
 
@@ -758,33 +773,38 @@ const Login = () => {
                   disabled={loading}
                   onClick={handleLogin}
                   startIcon={
-                    loading ? null : (
+                    !loading && (
                       <LoginRoundedIcon />
                     )
                   }
                   sx={{
                     mt: 3,
-                    py: 1.6,
+                    minHeight: 54,
                     borderRadius: 2.5,
                     textTransform: "none",
                     fontSize: 15.5,
-                    fontWeight: 700,
+                    fontWeight: 800,
                     background:
                       "linear-gradient(90deg,#2563EB,#3B82F6)",
                     boxShadow:
                       "0 12px 28px rgba(37,99,235,.25)",
-                    transition: ".25s",
+                    transition:
+                      "transform .2s ease, box-shadow .2s ease",
                     "&:hover": {
                       background:
                         "linear-gradient(90deg,#1D4ED8,#2563EB)",
                       transform:
                         "translateY(-1px)",
                       boxShadow:
-                        "0 15px 32px rgba(37,99,235,.32)",
+                        "0 16px 34px rgba(37,99,235,.32)",
                     },
                     "&:active": {
-                      transform:
-                        "translateY(0)",
+                      transform: "translateY(0)",
+                    },
+                    "&.Mui-disabled": {
+                      color: "#fff",
+                      background:
+                        "linear-gradient(90deg,#93C5FD,#60A5FA)",
                     },
                   }}
                 >
@@ -793,13 +813,9 @@ const Login = () => {
                     : "Sign in to VisitorPro"}
                 </Button>
 
-                {/* Security divider */}
+                {/* Security information */}
 
-                <Divider
-                  sx={{
-                    my: 3,
-                  }}
-                />
+                <Divider sx={{ my: 3 }} />
 
                 <Stack
                   direction="row"
@@ -816,7 +832,7 @@ const Login = () => {
 
                   <Typography
                     fontSize={12}
-                    color="text.secondary"
+                    color="#64748B"
                   >
                     Protected workplace access
                   </Typography>

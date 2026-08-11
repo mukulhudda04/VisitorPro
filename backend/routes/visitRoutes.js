@@ -1,22 +1,65 @@
 const express = require("express");
+
 const router = express.Router();
 
 const verifyToken = require("../middleware/authMiddleware");
+const requireAdmin = require("../middleware/adminMiddleware");
 
 const {
     checkInVisitor,
     checkOutVisitor,
     getActiveVisits,
-    getVisitHistory
+    getVisitHistory,
+    deleteVisitHistory,
+    deleteMultipleVisitHistory
 } = require("../controllers/visitController");
 
-// Protected Routes
-router.post("/checkin", verifyToken, checkInVisitor);
+// ==========================
+// PROTECTED ROUTES
+// ==========================
 
-router.put("/checkout/:id", verifyToken, checkOutVisitor);
+router.post(
+    "/checkin",
+    verifyToken,
+    checkInVisitor
+);
 
-router.get("/active", verifyToken, getActiveVisits);
+router.put(
+    "/checkout/:id",
+    verifyToken,
+    checkOutVisitor
+);
 
-router.get("/history", verifyToken, getVisitHistory);
+router.get(
+    "/active",
+    verifyToken,
+    getActiveVisits
+);
+
+router.get(
+    "/history",
+    verifyToken,
+    getVisitHistory
+);
+
+// ==========================
+// ADMIN ONLY - DELETE
+// ==========================
+
+// Delete single history entry
+router.delete(
+    "/history/:id",
+    verifyToken,
+    requireAdmin,
+    deleteVisitHistory
+);
+
+// Delete multiple history entries
+router.delete(
+    "/history",
+    verifyToken,
+    requireAdmin,
+    deleteMultipleVisitHistory
+);
 
 module.exports = router;
